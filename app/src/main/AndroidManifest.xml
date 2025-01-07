@@ -27,6 +27,10 @@
         <activity android:name=".SettingsActivity" />
 
         <activity android:name=".TaskActivity" />
+
+        <activity android:name=".TypingTestActivity"></activity>
+        <activity android:name=".MathTestActivity"></activity>
+
     </application>
 
 </manifest>
