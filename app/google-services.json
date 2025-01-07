@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1085007973019",
+    "project_id": "hci-projekt-cb805",
+    "storage_bucket": "hci-projekt-cb805.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1085007973019:android:9cad77642369b2e9e8d43e",
+        "android_client_info": {
+          "package_name": "hci.project.ads"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZkHtvSMJQ_9n-ZUrdH8vakX7frTV4tl4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
