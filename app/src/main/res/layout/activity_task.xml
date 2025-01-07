@@ -1,45 +1,86 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="16dp">
+    tools:context=".TaskActivity">
 
-    <!-- First button -->
-    <Button
-        android:id="@+id/btn_task_1"
-        android:layout_width="match_parent"
+    <!-- Prostor za reklame -->
+    <FrameLayout
+        android:id="@+id/adContainer"
+        android:layout_width="160dp"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- Tekstualni zadatak -->
+    <TextView
+        android:id="@+id/tvStringTask"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Task 1"
-        android:textSize="18sp"
-        android:layout_marginBottom="8dp"/>
+        android:text="Prepiši ovaj tekst:"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/adContainer"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp" />
 
-    <!-- Second button -->
-    <Button
-        android:id="@+id/btn_task_2"
-        android:layout_width="match_parent"
+    <!-- Polje za unos prepisanog teksta -->
+    <EditText
+        android:id="@+id/etStringInput"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Task 2"
-        android:textSize="18sp"
-        android:layout_marginBottom="8dp"/>
+        android:hint="Unesi tekst ovdje"
+        android:inputType="text"
+        app:layout_constraintTop_toBottomOf="@id/tvStringTask"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/adContainer"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp" />
 
-    <!-- Third button -->
-    <Button
-        android:id="@+id/btn_task_3"
-        android:layout_width="match_parent"
+    <!-- Matematički zadatak -->
+    <TextView
+        android:id="@+id/tvMathTask"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Task 3 - za sad ne radi"
-        android:textSize="18sp"
-        android:layout_marginBottom="8dp"/>
+        android:text="Riješi: 2 + 2"
+        app:layout_constraintTop_toBottomOf="@id/etStringInput"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/adContainer"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp" />
 
-    <!-- Fourth button -->
-    <Button
-        android:id="@+id/btn_task_4"
-        android:layout_width="match_parent"
+    <!-- Polje za unos rješenja matematičkog zadatka -->
+    <EditText
+        android:id="@+id/etMathInput"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Task 4 - za sad ne radi"
-        android:textSize="18sp"
-        android:layout_marginBottom="8dp"/>
+        android:hint="Unesi rješenje ovdje"
+        android:inputType="number"
+        app:layout_constraintTop_toBottomOf="@id/tvMathTask"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/adContainer"
+        android:layout_marginTop="8dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp" />
 
-</LinearLayout>
+    <!-- Gumb za potvrdu zadatka -->
+    <Button
+        android:id="@+id/btnSubmitTask"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="Submit Task"
+        app:layout_constraintTop_toBottomOf="@id/etMathInput"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/adContainer"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
