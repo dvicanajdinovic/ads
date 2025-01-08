@@ -16,11 +16,15 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import hci.project.ads.databinding.ActivityTaskBinding
+import java.util.UUID
 
 class TaskActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityTaskBinding
     private lateinit var database: DatabaseReference
+    private lateinit var videoView: VideoView
+    private lateinit var blinkingAd: ImageView
+    private val userId = "user_${UUID.randomUUID()}" // Generiraj jednistveni ID za korisnika
 
     private val adCombinations = listOf(
         Pair("static", "top_right"),
@@ -42,7 +46,7 @@ class TaskActivity : AppCompatActivity() {
         binding = ActivityTaskBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        database = FirebaseDatabase.getInstance("https://hci-projekt-cb805-default-rtdb.europe-west1.firebasedatabase.app").getReference("tasks")
+        database = FirebaseDatabase.getInstance("https://hci-projekt-cb805-default-rtdb.europe-west1.firebasedatabase.app").reference
 
         loadNextTask()
         binding.btnSubmitTask.setOnClickListener { onSubmitTask() }
@@ -60,37 +64,31 @@ class TaskActivity : AppCompatActivity() {
         setupAd(adType, adPosition)
 
         // Dohvati zadatke iz baze
-        database.child("string").get().addOnSuccessListener { stringSnapshot ->
-            database.child("math").get().addOnSuccessListener { mathSnapshot ->
-                val stringTasks = stringSnapshot.children.map { it.value.toString() }
-                val mathTasks = mathSnapshot.children.map { it.value.toString() }
+        database.child("tasks").get().addOnSuccessListener { tasksSnapshot ->
+            val stringTasks = tasksSnapshot.child("string").children.map { it.value.toString() }
+            val mathTasks = tasksSnapshot.child("math").children.map { it.value.toString() }
 
-                if (stringTasks.isNotEmpty() && mathTasks.isNotEmpty()) {
-                    // Nasumično odaberi zadatke
-                    val stringTask = stringTasks.random()
-                    val mathTask = mathTasks.random()
+            if (stringTasks.isNotEmpty() && mathTasks.isNotEmpty()) {
+                // Nasumično odaberi zadatke
+                val stringTask = stringTasks.random()
+                val mathTask = mathTasks.random()
 
-                    // Dodaj log za provjeru zadataka
-                    Log.d("Task", "String task: $stringTask")
-                    Log.d("Task", "Math task: $mathTask")
+                // Dodaj log za provjeru zadataka
+                Log.d("Task", "String task: $stringTask")
+                Log.d("Task", "Math task: $mathTask")
 
-                    // Postavi zadatke na UI
-                    binding.tvStringTask.text = stringTask
-                    binding.tvMathTask.text = mathTask
+                // Postavi zadatke na UI
+                binding.tvStringTask.text = stringTask
+                binding.tvMathTask.text = mathTask
 
-                    // Resetiraj unos korisnika
-                    binding.etStringInput.text.clear()
-                    binding.etMathInput.text.clear()
+                // Resetiraj unos korisnika
+                binding.etStringInput.text.clear()
+                binding.etMathInput.text.clear()
 
-                    // Započni mjerenje vremena
-                    startTime = System.currentTimeMillis()
-                } else {
-                    Toast.makeText(this, "Error loading tasks!", Toast.LENGTH_LONG).show()
-                }
-            }.addOnFailureListener { e ->
-                // Ako dođe do pogreške prilikom dohvaćanja podataka
-                Log.e("Firebase", "Error fetching math tasks: ${e.message}")
-                Toast.makeText(this, "Error fetching tasks from Firebase", Toast.LENGTH_LONG).show()
+                // Započni mjerenje vremena
+                startTime = System.currentTimeMillis()
+            } else {
+                Toast.makeText(this, "Error loading tasks!", Toast.LENGTH_LONG).show()
             }
         }.addOnFailureListener { e ->
             // Ako dođe do pogreške prilikom dohvaćanja podataka
@@ -121,7 +119,7 @@ class TaskActivity : AppCompatActivity() {
         val correctMath = evaluateMathExpression(binding.tvMathTask.text.toString())
 
         // Izračunaj greške
-        val stringErrors = if (stringInput == correctString) 0 else 1
+        val stringErrors = calculateLevenshteinDistance(stringInput, correctString)
         val mathErrors = if (mathInput == correctMath) 0 else 1
 
         // Izračunaj vrijeme izvršavanja
@@ -130,12 +128,12 @@ class TaskActivity : AppCompatActivity() {
 
         // Spremi rezultate u Firebase
         val results = mapOf(
-            "taskIndex" to currentTaskIndex,
             "stringErrors" to stringErrors,
             "mathErrors" to mathErrors,
             "executionTime" to executionTime
         )
-        database.child("results").child("user_${System.currentTimeMillis()}").setValue(results)
+        val testIndex = "test${currentTaskIndex + 1}"
+        database.child("results").child(userId).child(testIndex).setValue(results)
 
         // Pređi na sljedeći zadatak
         currentTaskIndex++
@@ -152,12 +150,36 @@ class TaskActivity : AppCompatActivity() {
         }
     }
 
+    fun calculateLevenshteinDistance(s1: String, s2: String): Int {
+        val lenStr1 = s1.length
+        val lenStr2 = s2.length
+        val dp = Array(lenStr1 + 1) { IntArray(lenStr2 + 1) }
+
+        for (i in 0..lenStr1) {
+            for (j in 0..lenStr2) {
+                if (i == 0) {
+                    dp[i][j] = j
+                } else if (j == 0) {
+                    dp[i][j] = i
+                } else {
+                    dp[i][j] = minOf(
+                        dp[i - 1][j - 1] + if (s1[i - 1] == s2[j - 1]) 0 else 1, // Zamjena
+                        dp[i - 1][j] + 1, // Brisanje
+                        dp[i][j - 1] + 1 // Umetanje
+                    )
+                }
+            }
+        }
+
+        return dp[lenStr1][lenStr2]
+    }
+
     // Funkcije za stvaranje reklama
     private fun createStaticAd(position: String): View {
         clearAdContainer()
         val ad = ImageView(this)
         ad.setImageResource(R.drawable.static_ad)
-        val layoutParams = FrameLayout.LayoutParams(120, 120) // Jednake dimenzije
+        val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300) // Jednake dimenzije
         ad.layoutParams = layoutParams
         ad.scaleType = ImageView.ScaleType.CENTER_CROP
         setAdPosition(ad, position) // Postavi poziciju
@@ -167,21 +189,48 @@ class TaskActivity : AppCompatActivity() {
 
     private fun createVideoAd(position: String): View {
         clearAdContainer()
-        val videoView = VideoView(this)
+        videoView = VideoView(this)
         val uri = Uri.parse("android.resource://$packageName/${R.raw.video_ad}")
         videoView.setVideoURI(uri)
-        val layoutParams = FrameLayout.LayoutParams(120, 120) // Jednake dimenzije
+        val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300) // Jednake dimenzije
         videoView.layoutParams = layoutParams
-        videoView.start() // Pokreni video
+        videoView.setOnPreparedListener { mp ->
+            mp.isLooping = true
+            videoView.start()
+        }
+        videoView.setOnErrorListener { mp, what, extra ->
+            Log.e("VideoAd", "Error: $what, $extra")
+            true
+        }
         setAdPosition(videoView, position) // Postavi poziciju
         return videoView
     }
 
+    override fun onPause() {
+        super.onPause()
+        if (::videoView.isInitialized) {
+            videoView.pause()
+        }
+        if (::blinkingAd.isInitialized) {
+            blinkingAd.clearAnimation()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        if (::videoView.isInitialized) {
+            videoView.stopPlayback()
+        }
+        if (::blinkingAd.isInitialized) {
+            blinkingAd.clearAnimation()
+        }
+    }
+
     private fun createBlinkingAd(position: String): View {
         clearAdContainer() // Ukloni postojeće prikaze i animacije
-        val blinkingAd = ImageView(this)
+        blinkingAd = ImageView(this)
         blinkingAd.setImageResource(R.drawable.blinking_ad) // Postavi sliku za titranje
-        val layoutParams = FrameLayout.LayoutParams(120, 120) // Jednake dimenzije
+        val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300) // Jednake dimenzije
         blinkingAd.layoutParams = layoutParams
         blinkingAd.scaleType = ImageView.ScaleType.CENTER_CROP
         // Dodaj animaciju za titranje
