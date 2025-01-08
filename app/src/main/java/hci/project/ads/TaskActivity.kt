@@ -36,10 +36,12 @@ class TaskActivity : AppCompatActivity() {
         Pair("blinking", "top_right"),
         Pair("blinking", "middle_right"),
         Pair("blinking", "bottom_right")
-    )
+    ).shuffled()
 
     private var currentTaskIndex = 0
     private var startTime: Long = 0L
+    private lateinit var currentAdType: String
+    private lateinit var currentAdPoisition: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -61,6 +63,9 @@ class TaskActivity : AppCompatActivity() {
 
         // Dohvati kombinaciju reklame
         val (adType, adPosition) = adCombinations[currentTaskIndex]
+        currentAdType = adType
+        currentAdPoisition = adPosition
+
         setupAd(adType, adPosition)
 
         // Dohvati zadatke iz baze
@@ -125,12 +130,15 @@ class TaskActivity : AppCompatActivity() {
         // Izračunaj vrijeme izvršavanja
         val endTime = System.currentTimeMillis()
         val executionTime = endTime - startTime
+        val executionTimeInSeconds = executionTime / 1000.0 // Pretvorba u sekunde
 
         // Spremi rezultate u Firebase
         val results = mapOf(
             "stringErrors" to stringErrors,
             "mathErrors" to mathErrors,
-            "executionTime" to executionTime
+            "executionTime" to executionTimeInSeconds,
+            "adType" to currentAdType,
+            "adPosition" to currentAdPoisition
         )
         val testIndex = "test${currentTaskIndex + 1}"
         database.child("results").child(userId).child(testIndex).setValue(results)
