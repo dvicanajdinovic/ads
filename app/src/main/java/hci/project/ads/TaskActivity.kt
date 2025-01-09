@@ -25,6 +25,7 @@ class TaskActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
     private lateinit var videoView: VideoView
     private lateinit var blinkingAd: ImageView
+    private lateinit var currentCorrectPicture: String
     private val userId = "user_${UUID.randomUUID()}" // Generiraj jednistveni ID za korisnika
 
     private val adCombinations = listOf(
@@ -67,7 +68,51 @@ class TaskActivity : AppCompatActivity() {
     }
 
     private fun selectRandomImages(): List<Int> {
-        return imageResources.shuffled().take(6)
+        // Lista direktorija
+        val directories = listOf("auto", "slon")
+
+        // Nasumično odaberi jedan direktorij
+        currentCorrectPicture = directories.random()
+
+        // Ispis radi provjere
+        Log.d("SelectRandomImages", "Selected directory: $currentCorrectPicture")
+
+        // Pronađi sve slike u odabranom direktoriju
+        val images = when (currentCorrectPicture) {
+            "auto" -> listOf(
+                R.drawable.car1,
+                R.drawable.car2,
+                R.drawable.car3,
+                R.drawable.car4,
+                R.drawable.non_car1,
+                R.drawable.non_car2,
+                R.drawable.non_car3,
+                R.drawable.non_car4
+            )
+            "slon" -> listOf(
+                R.drawable.slon1,
+                R.drawable.slon2,
+                R.drawable.slon3,
+                R.drawable.slon4,
+                R.drawable.non_slon1,
+                R.drawable.non_slon2,
+                R.drawable.non_slon3,
+                R.drawable.non_slon4
+            )
+            else -> emptyList()
+        }
+
+        // Nasumično odaberi 6 slika iz tog direktorija
+        return images.shuffled().take(6)
+    }
+
+    private fun updateImageInstructionText(directoryName: String) {
+        val instructionText = when (directoryName) {
+            "auto" -> "Izaberi slike gdje se nalazi auto"
+            "slon" -> "Izaberi slike gdje se nalazi slon"
+            else -> "Izaberi slike"
+        }
+        binding.tvImageInstruction.text = instructionText
     }
 
     private fun countIncorrectImages(selectedImages: List<Int>): Int {
@@ -86,6 +131,7 @@ class TaskActivity : AppCompatActivity() {
 
         // Osiguraj da RecyclerView bude vidljiv
         binding.rvImageSelection.visibility = View.VISIBLE
+        updateImageInstructionText(currentCorrectPicture)
     }
 
     private fun setupRecyclerView() {
@@ -94,6 +140,7 @@ class TaskActivity : AppCompatActivity() {
         binding.rvImageSelection.adapter = ImageSelectionAdapter(selectedImages) { imageRes ->
         }
         binding.rvImageSelection.visibility = View.VISIBLE
+        updateImageInstructionText(currentCorrectPicture)
         // Izračunaj broj pogrešnih slika
         val incorrectCount = countIncorrectImages(selectedImages)
         Log.d("ImageCheck", "Incorrect images count: $incorrectCount")
@@ -130,7 +177,6 @@ class TaskActivity : AppCompatActivity() {
                 // Postavi zadatke na UI
                 binding.tvStringTask.text = stringTask
                 binding.tvMathTask.text = mathTask
-                //showImageSelectionTask()
 
                 // Resetiraj unos korisnika
                 binding.etStringInput.text.clear()

@@ -68,6 +68,16 @@
                 android:inputType="number"
                 android:layout_marginBottom="8dp" />
 
+            <TextView
+                android:id="@+id/tvImageInstruction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="Izaberi slike gdje se nalazi auto"
+                android:textSize="18sp"
+                android:textColor="@android:color/black"
+                android:layout_gravity="center_horizontal"/>
+
             <!-- RecyclerView za odabir slika -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvImageSelection"
