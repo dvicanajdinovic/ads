@@ -54,5 +54,6 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.database)
     implementation(libs.firebase.storage)
-
+    implementation(libs.glide)
+    annotationProcessor(libs.glide.compiler)
 }

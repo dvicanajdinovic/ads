@@ -13,6 +13,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.GridLayoutManager
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import hci.project.ads.databinding.ActivityTaskBinding
@@ -24,6 +25,7 @@ class TaskActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
     private lateinit var videoView: VideoView
     private lateinit var blinkingAd: ImageView
+    private lateinit var imageAdapter: ImageAdapter
     private val userId = "user_${UUID.randomUUID()}" // Generiraj jednistveni ID za korisnika
 
     private val adCombinations = listOf(
@@ -42,11 +44,14 @@ class TaskActivity : AppCompatActivity() {
     private var startTime: Long = 0L
     private lateinit var currentAdType: String
     private lateinit var currentAdPoisition: String
+    private val imageTasks = mutableListOf<ImageTask>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTaskBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.rvImageSelection.layoutManager = GridLayoutManager(this, 6)
 
         database = FirebaseDatabase.getInstance("https://hci-projekt-cb805-default-rtdb.europe-west1.firebasedatabase.app").reference
 
@@ -72,6 +77,14 @@ class TaskActivity : AppCompatActivity() {
         database.child("tasks").get().addOnSuccessListener { tasksSnapshot ->
             val stringTasks = tasksSnapshot.child("string").children.map { it.value.toString() }
             val mathTasks = tasksSnapshot.child("math").children.map { it.value.toString() }
+            val pictureTasks = tasksSnapshot.child("pictures").children.map {
+                ImageTask(it.child("resName").value.toString(), it.child("containsCar").value as Boolean)
+            }
+
+            imageTasks.clear()
+            imageTasks.addAll(pictureTasks.shuffled().take(6))
+
+            Log.d("ImageTasks", "$imageTasks")
 
             if (stringTasks.isNotEmpty() && mathTasks.isNotEmpty()) {
                 // Nasumično odaberi zadatke
@@ -90,6 +103,11 @@ class TaskActivity : AppCompatActivity() {
                 binding.etStringInput.text.clear()
                 binding.etMathInput.text.clear()
 
+                imageAdapter = ImageAdapter(imageTasks) {
+
+                }
+                binding.rvImageSelection.adapter = imageAdapter
+                imageAdapter.notifyDataSetChanged()
                 // Započni mjerenje vremena
                 startTime = System.currentTimeMillis()
             } else {
@@ -127,6 +145,12 @@ class TaskActivity : AppCompatActivity() {
         val stringErrors = calculateLevenshteinDistance(stringInput, correctString)
         val mathErrors = if (mathInput == correctMath) 0 else 1
 
+        val selectedImagesResNames = imageAdapter.selectedImages
+        val correctImages = imageTasks.filter { it.containsCar }.map { it.resName }
+        val incorrectSelections = selectedImagesResNames.count { it !in selectedImagesResNames }
+        val missedSelections = correctImages.count { it !in selectedImagesResNames }
+        val imageErrors = incorrectSelections + missedSelections
+
         // Izračunaj vrijeme izvršavanja
         val endTime = System.currentTimeMillis()
         val executionTime = endTime - startTime
@@ -136,6 +160,7 @@ class TaskActivity : AppCompatActivity() {
         val results = mapOf(
             "stringErrors" to stringErrors,
             "mathErrors" to mathErrors,
+            "imageErrors" to imageErrors,
             "executionTime" to executionTimeInSeconds,
             "adType" to currentAdType,
             "adPosition" to currentAdPoisition
@@ -158,7 +183,7 @@ class TaskActivity : AppCompatActivity() {
         }
     }
 
-    fun calculateLevenshteinDistance(s1: String, s2: String): Int {
+    private fun calculateLevenshteinDistance(s1: String, s2: String): Int {
         val lenStr1 = s1.length
         val lenStr2 = s2.length
         val dp = Array(lenStr1 + 1) { IntArray(lenStr2 + 1) }

@@ -70,13 +70,29 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp" />
 
+    <!-- RecyclerView za slike -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvImageSelection"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/adContainer"
+        app:layout_constraintTop_toBottomOf="@id/etMathInput"
+        android:layout_marginTop="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="6"/>
+
     <!-- Gumb za potvrdu zadatka -->
     <Button
         android:id="@+id/btnSubmitTask"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Submit Task"
-        app:layout_constraintTop_toBottomOf="@id/etMathInput"
+        app:layout_constraintTop_toBottomOf="@id/rvImageSelection"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/adContainer"
         android:layout_marginTop="16dp"
