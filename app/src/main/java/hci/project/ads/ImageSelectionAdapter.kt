@@ -54,5 +54,7 @@ class ImageSelectionAdapter(
 
     override fun getItemCount(): Int = images.size
 
-    //fun getSelectedImages(): Set<Int> = selectedImages
+    fun getAllImages(): List<Int> {
+        return images
+    }
 }

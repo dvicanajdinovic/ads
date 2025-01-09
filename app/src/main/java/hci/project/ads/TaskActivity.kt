@@ -59,12 +59,44 @@ class TaskActivity : AppCompatActivity() {
         binding = ActivityTaskBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //binding.rvImageSelection.layoutManager = GridLayoutManager(this, 6)
-
         database = FirebaseDatabase.getInstance("https://hci-projekt-cb805-default-rtdb.europe-west1.firebasedatabase.app").reference
 
+        setupRecyclerView()
         loadNextTask()
         binding.btnSubmitTask.setOnClickListener { onSubmitTask() }
+    }
+
+    private fun selectRandomImages(): List<Int> {
+        return imageResources.shuffled().take(6)
+    }
+
+    private fun countIncorrectImages(selectedImages: List<Int>): Int {
+        val incorrectImages = selectedImages.filter { resources.getResourceEntryName(it).contains("non") }
+        return incorrectImages.size
+    }
+
+    private fun resetRecyclerView() {
+        // Nasumično odaberi 6 novih slika
+        val newSelectedImages = selectRandomImages()
+
+        // Resetiraj adapter sa novim slikama
+        binding.rvImageSelection.adapter = ImageSelectionAdapter(newSelectedImages) { imageRes ->
+            // Opcionalno: Ovdje možeš dodati akciju pri selekciji slika
+        }
+
+        // Osiguraj da RecyclerView bude vidljiv
+        binding.rvImageSelection.visibility = View.VISIBLE
+    }
+
+    private fun setupRecyclerView() {
+        val selectedImages = selectRandomImages() // Nasumično odaberi 6 slika
+        binding.rvImageSelection.layoutManager = GridLayoutManager(this, 2)
+        binding.rvImageSelection.adapter = ImageSelectionAdapter(selectedImages) { imageRes ->
+        }
+        binding.rvImageSelection.visibility = View.VISIBLE
+        // Izračunaj broj pogrešnih slika
+        val incorrectCount = countIncorrectImages(selectedImages)
+        Log.d("ImageCheck", "Incorrect images count: $incorrectCount")
     }
 
     private fun loadNextTask() {
@@ -98,7 +130,7 @@ class TaskActivity : AppCompatActivity() {
                 // Postavi zadatke na UI
                 binding.tvStringTask.text = stringTask
                 binding.tvMathTask.text = mathTask
-                showImageSelectionTask()
+                //showImageSelectionTask()
 
                 // Resetiraj unos korisnika
                 binding.etStringInput.text.clear()
@@ -143,12 +175,35 @@ class TaskActivity : AppCompatActivity() {
 
 
         // Provjera za slike
-        val selectedImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.selectedImages
-        if (selectedImages != null) {
-            Log.d("ImageSelection", "Selected images: $selectedImages")
-        }
-        val correctImages = listOf(R.drawable.car1, R.drawable.car2, R.drawable.car3) // Očekivane slike
-        val imageErrors = correctImages.size - (selectedImages?.intersect(correctImages)?.size ?: 0)
+        // Odabiremo slike
+        val selectedImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.selectedImages ?: emptySet()
+        val allImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.getAllImages() ?: emptyList()
+
+
+        Log.d("SelectedImages", "$selectedImages")
+
+        // Filtriramo slike koje sadrže "non" (neispravne slike)
+        val nonCarImages = selectedImages?.filter { resources.getResourceEntryName(it).contains("non") } ?: emptyList()
+
+        Log.d("NonCarImages", "${nonCarImages.size}")
+
+        // Filtriramo ispravne slike
+        val correctImages = allImages.filter { !resources.getResourceEntryName(it).contains("non") }
+        Log.d("CorrectImages", "${correctImages.size}")
+
+        // Izračun grešaka:
+        // 1. Broj krivo odabranih slika (neispravne slike koje su odabrane)
+        val incorrectSelected = nonCarImages.size
+        Log.d("IncorrectSelected", "$incorrectSelected")
+
+        // 2. Broj ispravnih slika koje nisu odabrane
+        val unselectedCorrectImages = correctImages.filter { !selectedImages.contains(it) }.size
+        Log.d("UnselectedCorrectImages", "$unselectedCorrectImages")
+
+        // Ukupni broj grešaka
+        val totalErrors = incorrectSelected + unselectedCorrectImages
+        Log.d("Errors", "Total errors: $totalErrors")
+
 
         // Izračunaj vrijeme izvršavanja
         val endTime = System.currentTimeMillis()
@@ -159,7 +214,7 @@ class TaskActivity : AppCompatActivity() {
         val results = mapOf(
             "stringErrors" to stringErrors,
             "mathErrors" to mathErrors,
-            "imageErrors" to imageErrors,
+            "imageErrors" to totalErrors,
             "executionTime" to executionTimeInSeconds,
             "adType" to currentAdType,
             "adPosition" to currentAdPoisition
@@ -169,6 +224,8 @@ class TaskActivity : AppCompatActivity() {
 
         // Pređi na sljedeći zadatak
         currentTaskIndex++
+        // Resetiraj RecyclerView sa novim slikama
+        resetRecyclerView()
         loadNextTask()
     }
 
@@ -314,15 +371,6 @@ class TaskActivity : AppCompatActivity() {
         }
         adContainer.removeAllViews()
         Log.d("Ads", "Ad container cleared.")
-    }
-
-    private fun showImageSelectionTask() {
-        binding.rvImageSelection.visibility = View.VISIBLE
-        val adapter = ImageSelectionAdapter(imageResources) { selectedImage ->
-            Log.d("ImageSelection", "Selected image: $selectedImage")
-        }
-        binding.rvImageSelection.layoutManager = GridLayoutManager(this, 3)
-        binding.rvImageSelection.adapter = adapter
     }
 
 }

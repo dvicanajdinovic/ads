@@ -1,18 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="100dp"
     android:layout_height="100dp"
     android:layout_margin="8dp"
     android:clickable="true"
-    android:focusable="true"
-    android:background="@drawable/image_selection_background">
+    android:focusable="true">
 
     <ImageView
         android:id="@+id/ivImage"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:scaleType="centerCrop"
+        android:padding="8dp"
         android:contentDescription="Image" />
 
 </androidx.cardview.widget.CardView>
