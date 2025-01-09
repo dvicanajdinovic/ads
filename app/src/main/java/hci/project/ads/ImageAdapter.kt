@@ -1,4 +1,4 @@
-package hci.project.ads
+/*package hci.project.ads
 
 import android.util.Log
 import android.view.LayoutInflater
@@ -47,3 +47,4 @@ class ImageAdapter(
         }
     }
 }
+*/

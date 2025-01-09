@@ -25,7 +25,6 @@ class TaskActivity : AppCompatActivity() {
     private lateinit var database: DatabaseReference
     private lateinit var videoView: VideoView
     private lateinit var blinkingAd: ImageView
-    private lateinit var imageAdapter: ImageAdapter
     private val userId = "user_${UUID.randomUUID()}" // Generiraj jednistveni ID za korisnika
 
     private val adCombinations = listOf(
@@ -44,14 +43,23 @@ class TaskActivity : AppCompatActivity() {
     private var startTime: Long = 0L
     private lateinit var currentAdType: String
     private lateinit var currentAdPoisition: String
-    private val imageTasks = mutableListOf<ImageTask>()
+    private val imageResources = listOf(
+        R.drawable.car1,
+        R.drawable.car2,
+        R.drawable.car3,
+        R.drawable.car4,
+        R.drawable.non_car1,
+        R.drawable.non_car2,
+        R.drawable.non_car3,
+        R.drawable.non_car4,
+        )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTaskBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.rvImageSelection.layoutManager = GridLayoutManager(this, 6)
+        //binding.rvImageSelection.layoutManager = GridLayoutManager(this, 6)
 
         database = FirebaseDatabase.getInstance("https://hci-projekt-cb805-default-rtdb.europe-west1.firebasedatabase.app").reference
 
@@ -77,14 +85,6 @@ class TaskActivity : AppCompatActivity() {
         database.child("tasks").get().addOnSuccessListener { tasksSnapshot ->
             val stringTasks = tasksSnapshot.child("string").children.map { it.value.toString() }
             val mathTasks = tasksSnapshot.child("math").children.map { it.value.toString() }
-            val pictureTasks = tasksSnapshot.child("pictures").children.map {
-                ImageTask(it.child("resName").value.toString(), it.child("containsCar").value as Boolean)
-            }
-
-            imageTasks.clear()
-            imageTasks.addAll(pictureTasks.shuffled().take(6))
-
-            Log.d("ImageTasks", "$imageTasks")
 
             if (stringTasks.isNotEmpty() && mathTasks.isNotEmpty()) {
                 // Nasumično odaberi zadatke
@@ -98,16 +98,12 @@ class TaskActivity : AppCompatActivity() {
                 // Postavi zadatke na UI
                 binding.tvStringTask.text = stringTask
                 binding.tvMathTask.text = mathTask
+                showImageSelectionTask()
 
                 // Resetiraj unos korisnika
                 binding.etStringInput.text.clear()
                 binding.etMathInput.text.clear()
 
-                imageAdapter = ImageAdapter(imageTasks) {
-
-                }
-                binding.rvImageSelection.adapter = imageAdapter
-                imageAdapter.notifyDataSetChanged()
                 // Započni mjerenje vremena
                 startTime = System.currentTimeMillis()
             } else {
@@ -145,11 +141,14 @@ class TaskActivity : AppCompatActivity() {
         val stringErrors = calculateLevenshteinDistance(stringInput, correctString)
         val mathErrors = if (mathInput == correctMath) 0 else 1
 
-        val selectedImagesResNames = imageAdapter.selectedImages
-        val correctImages = imageTasks.filter { it.containsCar }.map { it.resName }
-        val incorrectSelections = selectedImagesResNames.count { it !in selectedImagesResNames }
-        val missedSelections = correctImages.count { it !in selectedImagesResNames }
-        val imageErrors = incorrectSelections + missedSelections
+
+        // Provjera za slike
+        val selectedImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.selectedImages
+        if (selectedImages != null) {
+            Log.d("ImageSelection", "Selected images: $selectedImages")
+        }
+        val correctImages = listOf(R.drawable.car1, R.drawable.car2, R.drawable.car3) // Očekivane slike
+        val imageErrors = correctImages.size - (selectedImages?.intersect(correctImages)?.size ?: 0)
 
         // Izračunaj vrijeme izvršavanja
         val endTime = System.currentTimeMillis()
@@ -316,4 +315,14 @@ class TaskActivity : AppCompatActivity() {
         adContainer.removeAllViews()
         Log.d("Ads", "Ad container cleared.")
     }
+
+    private fun showImageSelectionTask() {
+        binding.rvImageSelection.visibility = View.VISIBLE
+        val adapter = ImageSelectionAdapter(imageResources) { selectedImage ->
+            Log.d("ImageSelection", "Selected image: $selectedImage")
+        }
+        binding.rvImageSelection.layoutManager = GridLayoutManager(this, 3)
+        binding.rvImageSelection.adapter = adapter
+    }
+
 }
