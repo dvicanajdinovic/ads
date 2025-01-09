@@ -18,6 +18,7 @@ import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import hci.project.ads.databinding.ActivityTaskBinding
 import java.util.UUID
+import kotlin.random.Random
 
 class TaskActivity : AppCompatActivity() {
 
@@ -44,6 +45,7 @@ class TaskActivity : AppCompatActivity() {
     private var startTime: Long = 0L
     private lateinit var currentAdType: String
     private lateinit var currentAdPoisition: String
+    private lateinit var sortedNumbers: List<Int>
     private val imageResources = listOf(
         R.drawable.car1,
         R.drawable.car2,
@@ -146,6 +148,12 @@ class TaskActivity : AppCompatActivity() {
         Log.d("ImageCheck", "Incorrect images count: $incorrectCount")
     }
 
+    private fun generateRandomNumbers(): List<Int> {
+        val numbers = List(5) { (1..100).random() }
+        return numbers
+    }
+
+
     private fun loadNextTask() {
         if (currentTaskIndex >= adCombinations.size) {
             Toast.makeText(this, "Session completed!", Toast.LENGTH_LONG).show()
@@ -157,6 +165,24 @@ class TaskActivity : AppCompatActivity() {
         val (adType, adPosition) = adCombinations[currentTaskIndex]
         currentAdType = adType
         currentAdPoisition = adPosition
+
+        val numbers = generateRandomNumbers()
+
+        val isAscending = Random.nextBoolean()
+
+        sortedNumbers = if (isAscending) {
+            numbers.sorted()
+        } else {
+            numbers.sortedDescending()
+        }
+
+        val sortOrderText = if (isAscending) {
+            "Sortiraj ove brojeve uzlazno: "
+        } else {
+            "Sortiraj ove brojeve silazno: "
+        }
+
+        binding.tvNumberTask.text = "$sortOrderText ${numbers.joinToString(", ")}"
 
         setupAd(adType, adPosition)
 
@@ -181,6 +207,7 @@ class TaskActivity : AppCompatActivity() {
                 // Resetiraj unos korisnika
                 binding.etStringInput.text.clear()
                 binding.etMathInput.text.clear()
+                binding.etNumberInput.text.clear()
 
                 // Započni mjerenje vremena
                 startTime = System.currentTimeMillis()
@@ -224,7 +251,12 @@ class TaskActivity : AppCompatActivity() {
         // Odabiremo slike
         val selectedImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.selectedImages ?: emptySet()
         val allImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.getAllImages() ?: emptyList()
+        val userInput = binding.etNumberInput.text.toString()
+        val userNumbers = userInput.split(",").map { it.trim().toIntOrNull() }.filterNotNull()
 
+        val sortErrors = userNumbers.zip(sortedNumbers) { userNumber, correctNumber ->
+            userNumber != correctNumber
+        }.count { it }
 
         Log.d("SelectedImages", "$selectedImages")
 
@@ -261,6 +293,7 @@ class TaskActivity : AppCompatActivity() {
             "stringErrors" to stringErrors,
             "mathErrors" to mathErrors,
             "imageErrors" to totalErrors,
+            "sortErrors" to sortErrors,
             "executionTime" to executionTimeInSeconds,
             "adType" to currentAdType,
             "adPosition" to currentAdPoisition

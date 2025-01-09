@@ -87,12 +87,35 @@
                 android:layout_marginBottom="16dp"
                 tools:listitem="@layout/item_image_selection" />
 
+            <!-- Zadatak za sortiranje brojeva -->
+            <TextView
+                android:id="@+id/tvNumberTask"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sortiraj sljedeće brojeve:"
+                android:layout_marginTop="16dp"
+                android:textSize="18sp"
+                android:textColor="@android:color/black"
+                android:layout_gravity="center_horizontal" />
+
+            <!-- Polje za unos brojeva -->
+            <EditText
+                android:id="@+id/etNumberInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Unesi sortirane brojeve"
+                android:inputType="text"
+                android:layout_marginBottom="8dp" />
+
+
             <!-- Gumb za potvrdu zadatka -->
             <Button
                 android:id="@+id/btnSubmitTask"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Submit Task" />
+
+
 
         </LinearLayout>
     </ScrollView>
