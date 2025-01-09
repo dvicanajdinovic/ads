@@ -8,6 +8,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
+import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
@@ -66,6 +67,7 @@ class TaskActivity : AppCompatActivity() {
 
         setupRecyclerView()
         loadNextTask()
+        binding.etStringInput.requestFocus()
         binding.btnSubmitTask.setOnClickListener { onSubmitTask() }
     }
 
@@ -306,6 +308,12 @@ class TaskActivity : AppCompatActivity() {
         // Resetiraj RecyclerView sa novim slikama
         resetRecyclerView()
         loadNextTask()
+        binding.scrollView.smoothScrollTo(0, 0)
+        binding.etStringInput.requestFocus()
+
+        // Sakrij tipkovnicu
+        val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(binding.etStringInput.windowToken, 0)
     }
 
     private fun evaluateMathExpression(expression: String): String {
