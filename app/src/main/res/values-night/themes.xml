@@ -10,6 +10,9 @@
         <item name="colorSecondary">@color/secondary</item>
         <item name="colorSecondaryVariant">@color/secondary_variant</item>
         <item name="colorOnSecondary">@color/black</item>
+        <!-- Dark theme primary colors. -->
+        <item name="colorSurface">@color/primary</item>
+        <item name="colorOnSurface">@color/primary_variant</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">#121212</item>
         <!-- Background color. -->
