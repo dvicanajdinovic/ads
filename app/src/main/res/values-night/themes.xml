@@ -12,11 +12,10 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Dark theme primary colors. -->
         <item name="colorSurface">@color/primary</item>
-        <item name="colorOnSurface">@color/primary_variant</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor">#121212</item>
         <!-- Background color. -->
-        <item name="android:windowBackground">@color/background</item>
+        <item name="android:windowBackground">@color/material_dynamic_neutral10</item>
         <!-- Customize your theme here. -->
     </style>
 </resources>

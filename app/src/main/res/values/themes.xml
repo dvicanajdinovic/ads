@@ -15,6 +15,7 @@
         <!-- Background color. -->
         <item name="android:windowBackground">@color/background</item>
         <!-- Customize your theme here. -->
+
     </style>
 
     <style name="Theme.Ads.NoActionBar">
