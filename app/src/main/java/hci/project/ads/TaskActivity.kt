@@ -4,14 +4,18 @@ package hci.project.ads
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
@@ -57,6 +61,9 @@ class TaskActivity : AppCompatActivity() {
     private lateinit var currentAdPoisition: String
     private lateinit var sortedNumbers: List<Int>
 
+    private var sequence: List<Int> = emptyList()
+    private val sequenceDisplayTime: Long = 5000
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTaskBinding.inflate(layoutInflater)
@@ -68,6 +75,24 @@ class TaskActivity : AppCompatActivity() {
         loadNextTask()
         binding.etStringInput.requestFocus()
         binding.btnSubmitTask.setOnClickListener { onSubmitTask() }
+    }
+
+    private fun setupRememberSequence() {
+        sequence = generateRandomSequence(5)
+        binding.sequenceTextView.text = sequence.joinToString(" ")
+        binding.sequenceShowButton.setOnClickListener {
+            binding.sequenceTextView.visibility = View.VISIBLE
+            binding.sequenceShowButton.visibility = View.GONE
+
+            Handler(Looper.getMainLooper()).postDelayed({
+                binding.sequenceTextView.visibility = View.GONE
+            }, sequenceDisplayTime)
+        }
+    }
+
+    private fun generateRandomSequence(length: Int): List<Int> {
+        val random = Random
+        return List(length) { random.nextInt(0, 10) }
     }
 
     private fun selectRandomImages(): List<Int> {
@@ -181,6 +206,7 @@ class TaskActivity : AppCompatActivity() {
 
 
     private fun loadNextTask() {
+
         if (currentTaskIndex >= adCombinations.size) {
             Toast.makeText(this, "Session completed!", Toast.LENGTH_LONG).show()
             finish()
@@ -193,7 +219,6 @@ class TaskActivity : AppCompatActivity() {
         currentAdPoisition = adPosition
 
         val numbers = generateRandomNumbers()
-
         val isAscending = Random.nextBoolean()
 
         sortedNumbers = if (isAscending) {
@@ -215,6 +240,10 @@ class TaskActivity : AppCompatActivity() {
         selectedAudioFileName = audioFileNames.random()
 
         setupAudioTask()
+        setupRememberSequence()
+
+        binding.sequenceTextView.visibility = View.GONE
+        binding.sequenceShowButton.visibility = View.VISIBLE
 
         // Dohvati zadatke iz baze
         database.child("tasks").get().addOnSuccessListener { tasksSnapshot ->
@@ -239,6 +268,7 @@ class TaskActivity : AppCompatActivity() {
                 binding.etMathInput.text.clear()
                 binding.etNumberInput.text.clear()
                 binding.etAudioInput.text.clear()
+                binding.sequenceUserInputText.text.clear()
 
                 // Započni mjerenje vremena
                 startTime = System.currentTimeMillis()
@@ -277,17 +307,32 @@ class TaskActivity : AppCompatActivity() {
         val stringErrors = calculateLevenshteinDistance(stringInput, correctString)
         val mathErrors = if (mathInput == correctMath) 0 else 1
 
-
         // Provjera za slike
         // Odabiremo slike
         val selectedImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.selectedImages ?: emptySet()
         val allImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.getAllImages() ?: emptyList()
+
         val userInput = binding.etNumberInput.text.toString()
         val userNumbers = userInput.split(",").map { it.trim().toIntOrNull() }.filterNotNull()
-
+        val missingSortCount = sortedNumbers.size - userNumbers.size
         val sortErrors = userNumbers.zip(sortedNumbers) { userNumber, correctNumber ->
             userNumber != correctNumber
         }.count { it }
+        val totalSortErrors = sortErrors + missingSortCount
+
+        val userInputRemember = binding.sequenceUserInputText.text.toString()
+        val userNumbersRemember = userInputRemember.split(",").map { it.trim().toIntOrNull() }.filterNotNull()
+
+        // Provjeri koliko brojeva korisnik unosi
+        val missingNumbersCount = sequence.size - userNumbersRemember.size
+
+        // Ako korisnik nije unio sve brojeve, tretiraj preostale brojeve kao greške
+        val sequenceNumberRememberErrors = userNumbersRemember.zip(sequence) { userNumber, correctNumber ->
+            userNumber != correctNumber
+        }.count { it }
+
+        // Dodaj greške za neunesene brojeve
+        val totalSequenceErrors = sequenceNumberRememberErrors + missingNumbersCount
 
         Log.d("SelectedImages", "$selectedImages")
 
@@ -328,8 +373,9 @@ class TaskActivity : AppCompatActivity() {
             "stringErrors" to stringErrors,
             "mathErrors" to mathErrors,
             "imageErrors" to totalErrors,
-            "sortErrors" to sortErrors,
+            "sortErrors" to totalSortErrors,
             "audioErrors" to audioErrors,
+            "sequenceRememberErrors" to totalSequenceErrors,
             "executionTime" to executionTimeInSeconds,
             "adType" to currentAdType,
             "adPosition" to currentAdPoisition
