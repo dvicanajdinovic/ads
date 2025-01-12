@@ -56,16 +56,6 @@ class TaskActivity : AppCompatActivity() {
     private lateinit var currentAdType: String
     private lateinit var currentAdPoisition: String
     private lateinit var sortedNumbers: List<Int>
-    private val imageResources = listOf(
-        R.drawable.car1,
-        R.drawable.car2,
-        R.drawable.car3,
-        R.drawable.car4,
-        R.drawable.non_car1,
-        R.drawable.non_car2,
-        R.drawable.non_car3,
-        R.drawable.non_car4,
-        )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +72,7 @@ class TaskActivity : AppCompatActivity() {
 
     private fun selectRandomImages(): List<Int> {
         // Lista direktorija
-        val directories = listOf("auto", "slon")
+        val directories = listOf("car", "slon")
 
         // Nasumično odaberi jedan direktorij
         currentCorrectPicture = directories.random()
@@ -91,29 +81,24 @@ class TaskActivity : AppCompatActivity() {
         Log.d("SelectRandomImages", "Selected directory: $currentCorrectPicture")
 
         // Pronađi sve slike u odabranom direktoriju
-        val images = when (currentCorrectPicture) {
-            "auto" -> listOf(
-                R.drawable.car1,
-                R.drawable.car2,
-                R.drawable.car3,
-                R.drawable.car4,
-                R.drawable.non_car1,
-                R.drawable.non_car2,
-                R.drawable.non_car3,
-                R.drawable.non_car4
-            )
-            "slon" -> listOf(
-                R.drawable.slon1,
-                R.drawable.slon2,
-                R.drawable.slon3,
-                R.drawable.slon4,
-                R.drawable.non_slon1,
-                R.drawable.non_slon2,
-                R.drawable.non_slon3,
-                R.drawable.non_slon4
-            )
-            else -> emptyList()
-        }
+        val images = listOf(
+            R.drawable.car1,
+            R.drawable.car2,
+            R.drawable.car3,
+            R.drawable.car4,
+            R.drawable.non1,
+            R.drawable.non2,
+            R.drawable.non3,
+            R.drawable.non4,
+            R.drawable.slon1,
+            R.drawable.slon2,
+            R.drawable.slon3,
+            R.drawable.slon4,
+            R.drawable.non5,
+            R.drawable.non6,
+            R.drawable.non7,
+            R.drawable.non8
+        )
 
         // Nasumično odaberi 6 slika iz tog direktorija
         return images.shuffled().take(6)
@@ -121,7 +106,7 @@ class TaskActivity : AppCompatActivity() {
 
     private fun updateImageInstructionText(directoryName: String) {
         val instructionText = when (directoryName) {
-            "auto" -> "Izaberi slike gdje se nalazi auto"
+            "car" -> "Izaberi slike gdje se nalazi auto"
             "slon" -> "Izaberi slike gdje se nalazi slon"
             else -> "Izaberi slike"
         }
@@ -307,12 +292,13 @@ class TaskActivity : AppCompatActivity() {
         Log.d("SelectedImages", "$selectedImages")
 
         // Filtriramo slike koje sadrže "non" (neispravne slike)
-        val nonCarImages = selectedImages?.filter { resources.getResourceEntryName(it).contains("non") } ?: emptyList()
+        val nonCarImages = selectedImages.filter { !resources.getResourceEntryName(it).contains(currentCorrectPicture) }
+            ?: emptyList()
 
         Log.d("NonCarImages", "${nonCarImages.size}")
 
         // Filtriramo ispravne slike
-        val correctImages = allImages.filter { !resources.getResourceEntryName(it).contains("non") }
+        val correctImages = allImages.filter { resources.getResourceEntryName(it).contains(currentCorrectPicture) }
         Log.d("CorrectImages", "${correctImages.size}")
 
         // Izračun grešaka:
