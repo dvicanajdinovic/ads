@@ -1,6 +1,7 @@
 package hci.project.ads
 
 
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -29,6 +30,7 @@ class TaskActivity : AppCompatActivity() {
     private lateinit var blinkingAd: ImageView
     private lateinit var currentCorrectPicture: String
     private val userId = "user_${UUID.randomUUID()}" // Generiraj jednistveni ID za korisnika
+    private lateinit var mediaPlayer: MediaPlayer
 
     private val adCombinations = listOf(
         Pair("static", "top_right"),
@@ -41,6 +43,13 @@ class TaskActivity : AppCompatActivity() {
         Pair("blinking", "middle_right"),
         Pair("blinking", "bottom_right")
     ).shuffled()
+
+    private val audioFileNames = listOf(
+        "keyboard",
+        "tenisice"
+    )
+
+    private var selectedAudioFileName: String? = null
 
     private var currentTaskIndex = 0
     private var startTime: Long = 0L
@@ -119,6 +128,36 @@ class TaskActivity : AppCompatActivity() {
         binding.tvImageInstruction.text = instructionText
     }
 
+    private fun setupAudioTask() {
+        val audioTaskContainer = binding.audioTaskContainer
+        val playButton = binding.btnPlayAudio
+
+        // Prikaži zadatak
+        audioTaskContainer.visibility = View.VISIBLE
+
+        // Dohvati resursni ID audio datoteke na temelju odabranog naziva
+        val resId = resources.getIdentifier(selectedAudioFileName, "raw", packageName)
+
+        if (resId != 0) { // Provjeri je li resurs pronađen
+            // Poveži MediaPlayer s audio resursom
+            mediaPlayer = MediaPlayer.create(this, resId)
+
+            // Postavi listener za reprodukciju
+            playButton.setOnClickListener {
+                if (!mediaPlayer.isPlaying) {
+                    mediaPlayer.start()
+                } else {
+                    mediaPlayer.pause()
+                }
+            }
+        } else {
+            // Ako resurs nije pronađen, sakrij zadatak i prikaži poruku o grešci
+            audioTaskContainer.visibility = View.GONE
+            Log.e("AudioTask", "Audio resurs nije pronađen za: $selectedAudioFileName")
+        }
+    }
+
+
     private fun countIncorrectImages(selectedImages: List<Int>): Int {
         val incorrectImages = selectedImages.filter { resources.getResourceEntryName(it).contains("non") }
         return incorrectImages.size
@@ -188,6 +227,10 @@ class TaskActivity : AppCompatActivity() {
 
         setupAd(adType, adPosition)
 
+        selectedAudioFileName = audioFileNames.random()
+
+        setupAudioTask()
+
         // Dohvati zadatke iz baze
         database.child("tasks").get().addOnSuccessListener { tasksSnapshot ->
             val stringTasks = tasksSnapshot.child("string").children.map { it.value.toString() }
@@ -210,6 +253,7 @@ class TaskActivity : AppCompatActivity() {
                 binding.etStringInput.text.clear()
                 binding.etMathInput.text.clear()
                 binding.etNumberInput.text.clear()
+                binding.etAudioInput.text.clear()
 
                 // Započni mjerenje vremena
                 startTime = System.currentTimeMillis()
@@ -284,6 +328,9 @@ class TaskActivity : AppCompatActivity() {
         val totalErrors = incorrectSelected + unselectedCorrectImages
         Log.d("Errors", "Total errors: $totalErrors")
 
+        val userAudioResponse = binding.etAudioInput.text.toString().trim()
+        val correctAudioAnswer = selectedAudioFileName ?: ""
+        val audioErrors = if (userAudioResponse.equals(correctAudioAnswer, ignoreCase = true)) 0 else 1
 
         // Izračunaj vrijeme izvršavanja
         val endTime = System.currentTimeMillis()
@@ -296,6 +343,7 @@ class TaskActivity : AppCompatActivity() {
             "mathErrors" to mathErrors,
             "imageErrors" to totalErrors,
             "sortErrors" to sortErrors,
+            "audioErrors" to audioErrors,
             "executionTime" to executionTimeInSeconds,
             "adType" to currentAdType,
             "adPosition" to currentAdPoisition
@@ -399,6 +447,9 @@ class TaskActivity : AppCompatActivity() {
         }
         if (::blinkingAd.isInitialized) {
             blinkingAd.clearAnimation()
+        }
+        if (::mediaPlayer.isInitialized) {
+            mediaPlayer.release()
         }
     }
 
