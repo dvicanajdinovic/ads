@@ -139,6 +139,36 @@
 
             </LinearLayout>
 
+            <LinearLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="16dp">
+
+                <Button
+                    android:id="@+id/sequenceShowButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Prikaži sekvencu"
+                    android:visibility="visible" />
+
+                <TextView
+                    android:id="@+id/sequenceTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="24sp"
+                    android:visibility="gone" />
+
+                <EditText
+                    android:id="@+id/sequenceUserInputText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Ponovite sekvencu"
+                    android:visibility="visible" />
+            </LinearLayout>
+
+
             <!-- Gumb za potvrdu zadatka -->
             <Button
                 android:id="@+id/btnSubmitTask"
