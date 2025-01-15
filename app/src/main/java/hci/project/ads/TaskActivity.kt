@@ -53,6 +53,11 @@ class TaskActivity : AppCompatActivity() {
         "tenisice"
     )
 
+    private val stringTasks = listOf(
+        "riba ribi grize rep",
+        "maca maci grize rep"
+    )
+
     private var selectedAudioFileName: String? = null
 
     private var currentTaskIndex = 0
@@ -245,26 +250,27 @@ class TaskActivity : AppCompatActivity() {
         binding.sequenceTextView.visibility = View.GONE
         binding.sequenceShowButton.visibility = View.VISIBLE
 
+        val stringTask = stringTasks.random()
+        binding.tvStringTask.text = stringTask
+        binding.etStringInput.text.clear()
+
+
+
         // Dohvati zadatke iz baze
         database.child("tasks").get().addOnSuccessListener { tasksSnapshot ->
-            val stringTasks = tasksSnapshot.child("string").children.map { it.value.toString() }
             val mathTasks = tasksSnapshot.child("math").children.map { it.value.toString() }
 
-            if (stringTasks.isNotEmpty() && mathTasks.isNotEmpty()) {
+            if (mathTasks.isNotEmpty()) {
                 // Nasumično odaberi zadatke
-                val stringTask = stringTasks.random()
                 val mathTask = mathTasks.random()
 
                 // Dodaj log za provjeru zadataka
-                Log.d("Task", "String task: $stringTask")
                 Log.d("Task", "Math task: $mathTask")
 
                 // Postavi zadatke na UI
-                binding.tvStringTask.text = stringTask
                 binding.tvMathTask.text = mathTask
 
                 // Resetiraj unos korisnika
-                binding.etStringInput.text.clear()
                 binding.etMathInput.text.clear()
                 binding.etNumberInput.text.clear()
                 binding.etAudioInput.text.clear()
