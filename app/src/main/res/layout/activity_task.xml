@@ -37,14 +37,14 @@
 
             <!-- Tekstualni zadatak -->
             <TextView
-                android:id="@+id/tvStringTask"
+                android:id="@+id/stringCompareTaskText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Prepiši ovaj tekst:"/>
 
             <!-- Polje za unos prepisanog teksta -->
             <EditText
-                android:id="@+id/etStringInput"
+                android:id="@+id/stringCompareTaskInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Unesi tekst ovdje"
@@ -53,7 +53,7 @@
 
             <!-- Matematički zadatak -->
             <TextView
-                android:id="@+id/tvMathTask"
+                android:id="@+id/mathTaskText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Riješi: 2 + 2"
@@ -61,15 +61,15 @@
 
             <!-- Polje za unos rješenja matematičkog zadatka -->
             <EditText
-                android:id="@+id/etMathInput"
+                android:id="@+id/mathTaskInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Unesi rješenje ovdje"
-                android:inputType="number"
+                android:inputType="numberSigned"
                 android:layout_marginBottom="8dp" />
 
             <TextView
-                android:id="@+id/tvImageInstruction"
+                android:id="@+id/imageTaskInstruction"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
@@ -89,7 +89,7 @@
 
             <!-- Zadatak za sortiranje brojeva -->
             <TextView
-                android:id="@+id/tvNumberTask"
+                android:id="@+id/numberSortTaskText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Sortiraj sljedeće brojeve:"
@@ -100,7 +100,7 @@
 
             <!-- Polje za unos brojeva -->
             <EditText
-                android:id="@+id/etNumberInput"
+                android:id="@+id/numberSortTaskInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Unesi sortirane brojeve"
@@ -116,7 +116,7 @@
                 android:visibility="visible">
 
                 <TextView
-                    android:id="@+id/tv_audio_instruction"
+                    android:id="@+id/audioTaskInstruction"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Preslušaj audio snimku i napiši što čuješ:"
@@ -130,7 +130,7 @@
                     android:text="Reproduciraj snimku" />
 
                 <EditText
-                    android:id="@+id/et_audio_input"
+                    android:id="@+id/audioTaskInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Upiši što čuješ"
@@ -175,8 +175,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Submit Task" />
-
-
 
         </LinearLayout>
     </ScrollView>

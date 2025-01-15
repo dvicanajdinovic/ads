@@ -12,10 +12,8 @@ import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.inputmethod.InputMethodManager
-import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.TextView
 import android.widget.Toast
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
@@ -33,9 +31,12 @@ class TaskActivity : AppCompatActivity() {
     private lateinit var videoView: VideoView
     private lateinit var blinkingAd: ImageView
     private lateinit var currentCorrectPicture: String
-    private val userId = "user_${UUID.randomUUID()}" // Generiraj jednistveni ID za korisnika
     private lateinit var mediaPlayer: MediaPlayer
+    private lateinit var currentAdType: String
+    private lateinit var currentAdPoisition: String
+    private lateinit var sortedNumbers: List<Int>
 
+    private val userId = "user_${UUID.randomUUID()}" // Generiraj jednistveni ID za korisnika
     private val adCombinations = listOf(
         Pair("static", "top_right"),
         Pair("static", "middle_right"),
@@ -53,16 +54,41 @@ class TaskActivity : AppCompatActivity() {
         "tenisice"
     )
 
-    private var selectedAudioFileName: String? = null
+    private val stringTasks = listOf(
+        "riba ribi grize rep",
+        "maca maci grize rep"
+    )
 
+    private val pictureTypes = listOf(
+        "car",
+        "slon"
+    )
+
+    private val imagesInDrawable = listOf(
+        R.drawable.car1,
+        R.drawable.car2,
+        R.drawable.car3,
+        R.drawable.car4,
+        R.drawable.non1,
+        R.drawable.non2,
+        R.drawable.non3,
+        R.drawable.non4,
+        R.drawable.slon1,
+        R.drawable.slon2,
+        R.drawable.slon3,
+        R.drawable.slon4,
+        R.drawable.non5,
+        R.drawable.non6,
+        R.drawable.non7,
+        R.drawable.non8
+    )
+
+    private var selectedAudioFileName: String? = null
     private var currentTaskIndex = 0
     private var startTime: Long = 0L
-    private lateinit var currentAdType: String
-    private lateinit var currentAdPoisition: String
-    private lateinit var sortedNumbers: List<Int>
-
     private var sequence: List<Int> = emptyList()
     private val sequenceDisplayTime: Long = 5000
+    private val randomSequenceLength = 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,62 +97,110 @@ class TaskActivity : AppCompatActivity() {
 
         database = FirebaseDatabase.getInstance("https://hci-projekt-cb805-default-rtdb.europe-west1.firebasedatabase.app").reference
 
+        binding.btnSubmitTask.setOnClickListener { onSubmitTask() }
+
         setupRecyclerView()
         loadNextTask()
-        binding.etStringInput.requestFocus()
-        binding.btnSubmitTask.setOnClickListener { onSubmitTask() }
+    }
+
+    private fun setupRecyclerView() {
+        val selectedImages = selectRandomImages() // Nasumično odaberi 6 slika
+        binding.rvImageSelection.layoutManager = GridLayoutManager(this, 2)
+        binding.rvImageSelection.adapter = ImageSelectionAdapter(selectedImages) { _ ->
+        }
+        binding.rvImageSelection.visibility = View.VISIBLE
+        updateImageInstructionText(currentCorrectPicture)
+    }
+
+    private fun loadNextTask() {
+
+        if (currentTaskIndex >= adCombinations.size) {
+            Toast.makeText(this, "Session completed!", Toast.LENGTH_LONG).show()
+            finish()
+            return
+        }
+
+        currentFocus?.clearFocus()
+
+        initializeAdTypeAdPosition()
+        initializeSortSequenceTask()
+        setupAudioTask()
+        setupRememberSequence()
+        setupStringTask()
+        setupMathTask()
+        clearUserInputs()
+        hideKeyboard()
+
+        startTime = System.currentTimeMillis()
+    }
+
+    private fun initializeAdTypeAdPosition() {
+        val (adType, adPosition) = adCombinations[currentTaskIndex]
+        currentAdType = adType
+        currentAdPoisition = adPosition
+        setupAd(adType, adPosition)
+    }
+
+    private fun initializeSortSequenceTask() {
+        val numbers = generateRandomNumbers()
+        val isAscending = Random.nextBoolean()
+        sortedNumbers = if (isAscending) {
+            numbers.sorted()
+        } else {
+            numbers.sortedDescending()
+        }
+        val sortOrderText = if (isAscending) {
+            "Sortiraj ove brojeve uzlazno: "
+        } else {
+            "Sortiraj ove brojeve silazno: "
+        }
+        binding.numberSortTaskText.text = "$sortOrderText ${numbers.joinToString(", ")}"
     }
 
     private fun setupRememberSequence() {
-        sequence = generateRandomSequence(5)
+        binding.sequenceTextView.visibility = View.GONE
+        binding.sequenceShowButton.visibility = View.VISIBLE
+        sequence = generateRandomSequence()
         binding.sequenceTextView.text = sequence.joinToString(" ")
         binding.sequenceShowButton.setOnClickListener {
             binding.sequenceTextView.visibility = View.VISIBLE
             binding.sequenceShowButton.visibility = View.GONE
+            binding.sequenceUserInputText.visibility = View.GONE
 
             Handler(Looper.getMainLooper()).postDelayed({
                 binding.sequenceTextView.visibility = View.GONE
+                binding.sequenceUserInputText.visibility = View.VISIBLE
             }, sequenceDisplayTime)
         }
     }
 
-    private fun generateRandomSequence(length: Int): List<Int> {
+    private fun setupStringTask() {
+        val stringTask = stringTasks.random()
+        binding.stringCompareTaskText.text = stringTask
+    }
+
+    private fun setupMathTask() {
+        val mathTask = generateRandomMathTask()
+        binding.mathTaskText.text = mathTask
+    }
+
+    private fun clearUserInputs() {
+        binding.stringCompareTaskInput.text.clear()
+        binding.mathTaskInput.text.clear()
+        binding.numberSortTaskInput.text.clear()
+        binding.audioTaskInput.text.clear()
+        binding.sequenceUserInputText.text.clear()
+    }
+
+    private fun generateRandomSequence(): List<Int> {
         val random = Random
-        return List(length) { random.nextInt(0, 10) }
+        return List(randomSequenceLength) { random.nextInt(0, 10) }
     }
 
     private fun selectRandomImages(): List<Int> {
-        // Lista direktorija
-        val directories = listOf("car", "slon")
-
-        // Nasumično odaberi jedan direktorij
-        currentCorrectPicture = directories.random()
-
-        // Ispis radi provjere
-        Log.d("SelectRandomImages", "Selected directory: $currentCorrectPicture")
-
-        // Pronađi sve slike u odabranom direktoriju
-        val images = listOf(
-            R.drawable.car1,
-            R.drawable.car2,
-            R.drawable.car3,
-            R.drawable.car4,
-            R.drawable.non1,
-            R.drawable.non2,
-            R.drawable.non3,
-            R.drawable.non4,
-            R.drawable.slon1,
-            R.drawable.slon2,
-            R.drawable.slon3,
-            R.drawable.slon4,
-            R.drawable.non5,
-            R.drawable.non6,
-            R.drawable.non7,
-            R.drawable.non8
-        )
-
+        currentCorrectPicture = pictureTypes.random()
         // Nasumično odaberi 6 slika iz tog direktorija
-        return images.shuffled().take(6)
+        return imagesInDrawable.shuffled().take(6)
     }
 
     private fun updateImageInstructionText(directoryName: String) {
@@ -135,10 +209,11 @@ class TaskActivity : AppCompatActivity() {
             "slon" -> "Izaberi slike gdje se nalazi slon"
             else -> "Izaberi slike"
         }
-        binding.tvImageInstruction.text = instructionText
+        binding.imageTaskInstruction.text = instructionText
     }
 
     private fun setupAudioTask() {
+        selectedAudioFileName = audioFileNames.random()
         val audioTaskContainer = binding.audioTaskContainer
         val playButton = binding.btnPlayAudio
 
@@ -167,18 +242,12 @@ class TaskActivity : AppCompatActivity() {
         }
     }
 
-
-    private fun countIncorrectImages(selectedImages: List<Int>): Int {
-        val incorrectImages = selectedImages.filter { resources.getResourceEntryName(it).contains("non") }
-        return incorrectImages.size
-    }
-
     private fun resetRecyclerView() {
         // Nasumično odaberi 6 novih slika
         val newSelectedImages = selectRandomImages()
 
         // Resetiraj adapter sa novim slikama
-        binding.rvImageSelection.adapter = ImageSelectionAdapter(newSelectedImages) { imageRes ->
+        binding.rvImageSelection.adapter = ImageSelectionAdapter(newSelectedImages) { _ ->
             // Opcionalno: Ovdje možeš dodati akciju pri selekciji slika
         }
 
@@ -187,99 +256,9 @@ class TaskActivity : AppCompatActivity() {
         updateImageInstructionText(currentCorrectPicture)
     }
 
-    private fun setupRecyclerView() {
-        val selectedImages = selectRandomImages() // Nasumično odaberi 6 slika
-        binding.rvImageSelection.layoutManager = GridLayoutManager(this, 2)
-        binding.rvImageSelection.adapter = ImageSelectionAdapter(selectedImages) { imageRes ->
-        }
-        binding.rvImageSelection.visibility = View.VISIBLE
-        updateImageInstructionText(currentCorrectPicture)
-        // Izračunaj broj pogrešnih slika
-        val incorrectCount = countIncorrectImages(selectedImages)
-        Log.d("ImageCheck", "Incorrect images count: $incorrectCount")
-    }
-
     private fun generateRandomNumbers(): List<Int> {
         val numbers = List(5) { (1..100).random() }
         return numbers
-    }
-
-
-    private fun loadNextTask() {
-
-        if (currentTaskIndex >= adCombinations.size) {
-            Toast.makeText(this, "Session completed!", Toast.LENGTH_LONG).show()
-            finish()
-            return
-        }
-
-        // Dohvati kombinaciju reklame
-        val (adType, adPosition) = adCombinations[currentTaskIndex]
-        currentAdType = adType
-        currentAdPoisition = adPosition
-
-        val numbers = generateRandomNumbers()
-        val isAscending = Random.nextBoolean()
-
-        sortedNumbers = if (isAscending) {
-            numbers.sorted()
-        } else {
-            numbers.sortedDescending()
-        }
-
-        val sortOrderText = if (isAscending) {
-            "Sortiraj ove brojeve uzlazno: "
-        } else {
-            "Sortiraj ove brojeve silazno: "
-        }
-
-        binding.tvNumberTask.text = "$sortOrderText ${numbers.joinToString(", ")}"
-
-        setupAd(adType, adPosition)
-
-        selectedAudioFileName = audioFileNames.random()
-
-        setupAudioTask()
-        setupRememberSequence()
-
-        binding.sequenceTextView.visibility = View.GONE
-        binding.sequenceShowButton.visibility = View.VISIBLE
-
-        // Dohvati zadatke iz baze
-        database.child("tasks").get().addOnSuccessListener { tasksSnapshot ->
-            val stringTasks = tasksSnapshot.child("string").children.map { it.value.toString() }
-            val mathTasks = tasksSnapshot.child("math").children.map { it.value.toString() }
-
-            if (stringTasks.isNotEmpty() && mathTasks.isNotEmpty()) {
-                // Nasumično odaberi zadatke
-                val stringTask = stringTasks.random()
-                val mathTask = mathTasks.random()
-
-                // Dodaj log za provjeru zadataka
-                Log.d("Task", "String task: $stringTask")
-                Log.d("Task", "Math task: $mathTask")
-
-                // Postavi zadatke na UI
-                binding.tvStringTask.text = stringTask
-                binding.tvMathTask.text = mathTask
-
-                // Resetiraj unos korisnika
-                binding.etStringInput.text.clear()
-                binding.etMathInput.text.clear()
-                binding.etNumberInput.text.clear()
-                binding.etAudioInput.text.clear()
-                binding.sequenceUserInputText.text.clear()
-
-                // Započni mjerenje vremena
-                startTime = System.currentTimeMillis()
-            } else {
-                Toast.makeText(this, "Error loading tasks!", Toast.LENGTH_LONG).show()
-            }
-        }.addOnFailureListener { e ->
-            // Ako dođe do pogreške prilikom dohvaćanja podataka
-            Log.e("Firebase", "Error fetching string tasks: ${e.message}")
-            Toast.makeText(this, "Error fetching tasks from Firebase", Toast.LENGTH_LONG).show()
-        }
     }
 
     private fun setupAd(adType: String, adPosition: String) {
@@ -294,39 +273,73 @@ class TaskActivity : AppCompatActivity() {
         Log.d("Ads", "Ad type: $adType, Position: $adPosition")
     }
 
+    private fun generateRandomMathTask(): String {
+        val number1 = (1..10).random()
+        val number2 = (1..10).random()
+        val operation = listOf("+", "-", "*").random()
+
+        return "$number1 $operation $number2"
+    }
+
     private fun onSubmitTask() {
-        // Dohvati korisnički unos
-        val stringInput = binding.etStringInput.text.toString()
-        val mathInput = binding.etMathInput.text.toString()
+        val stringErrors = calculateStringErrors()
+        val mathErrors = calculateMathErrors()
+        val sortErrors = calculateSortErrors()
+        val rememberSequenceErrors = calculateRememberSequenceErrors()
+        val totalPictureErrors = calculatePictureErrors()
+        val audioErrors = calculateAudioErrors()
+        val executionTimeInSeconds = calculateExecutionTime()
 
-        // Dohvati točne odgovore
-        val correctString = binding.tvStringTask.text.toString()
-        val correctMath = evaluateMathExpression(binding.tvMathTask.text.toString())
+        // Spremi rezultate u Firebase
+        val results = mapOf(
+            "stringErrors" to stringErrors,
+            "mathErrors" to mathErrors,
+            "imageErrors" to totalPictureErrors,
+            "sortErrors" to sortErrors,
+            "audioErrors" to audioErrors,
+            "sequenceRememberErrors" to rememberSequenceErrors,
+            "executionTime" to executionTimeInSeconds,
+            "adType" to currentAdType,
+            "adPosition" to currentAdPoisition
+        )
 
-        // Izračunaj greške
-        val stringErrors = calculateLevenshteinDistance(stringInput, correctString)
-        val mathErrors = if (mathInput == correctMath) 0 else 1
+        val testIndex = "test${currentTaskIndex + 1}"
+        database.child("results").child(userId).child(testIndex).setValue(results)
+        proceedToNextTaskActions()
+    }
 
-        // Provjera za slike
-        // Odabiremo slike
-        val selectedImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.selectedImages ?: emptySet()
-        val allImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.getAllImages() ?: emptyList()
+    private fun calculateStringErrors() : Int {
+        val stringInput = binding.stringCompareTaskInput.text.toString()
+        val correctString = binding.stringCompareTaskText.text.toString()
+        return calculateLevenshteinDistance(stringInput, correctString)
+    }
 
-        val userInput = binding.etNumberInput.text.toString()
-        val userNumbers = userInput.split(",").map { it.trim().toIntOrNull() }.filterNotNull()
+    private fun calculateMathErrors() : Int {
+        val mathInput = binding.mathTaskInput.text.toString()
+        val correctMathInput = evaluateMathTask(binding.mathTaskText.text.toString())
+        return if (mathInput == correctMathInput.toString()) 0 else 1
+    }
+
+    private fun calculateSortErrors() : Int {
+        val userInput = binding.numberSortTaskInput.text.toString()
+        val userNumbers = userInput.split(",").mapNotNull { it.trim().toIntOrNull() }
         val missingSortCount = sortedNumbers.size - userNumbers.size
         val sortErrors = userNumbers.zip(sortedNumbers) { userNumber, correctNumber ->
             userNumber != correctNumber
         }.count { it }
         val totalSortErrors = sortErrors + missingSortCount
 
+        return totalSortErrors
+    }
+
+    private fun calculateRememberSequenceErrors() : Int {
         val userInputRemember = binding.sequenceUserInputText.text.toString()
-        val userNumbersRemember = userInputRemember.split(",").map { it.trim().toIntOrNull() }.filterNotNull()
+        val userNumbersRemember =
+            userInputRemember.split(",").mapNotNull { it.trim().toIntOrNull() }
 
         // Provjeri koliko brojeva korisnik unosi
         val missingNumbersCount = sequence.size - userNumbersRemember.size
 
-        // Ako korisnik nije unio sve brojeve, tretiraj preostale brojeve kao greške
         val sequenceNumberRememberErrors = userNumbersRemember.zip(sequence) { userNumber, correctNumber ->
             userNumber != correctNumber
         }.count { it }
@@ -334,77 +347,74 @@ class TaskActivity : AppCompatActivity() {
         // Dodaj greške za neunesene brojeve
         val totalSequenceErrors = sequenceNumberRememberErrors + missingNumbersCount
 
-        Log.d("SelectedImages", "$selectedImages")
+        return totalSequenceErrors
+    }
+
+    private fun calculatePictureErrors() : Int {
+        val selectedImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.selectedImages ?: emptySet()
+        val allImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.getAllImages() ?: emptyList()
 
         // Filtriramo slike koje sadrže "non" (neispravne slike)
         val nonCarImages = selectedImages.filter { !resources.getResourceEntryName(it).contains(currentCorrectPicture) }
-            ?: emptyList()
-
-        Log.d("NonCarImages", "${nonCarImages.size}")
 
         // Filtriramo ispravne slike
         val correctImages = allImages.filter { resources.getResourceEntryName(it).contains(currentCorrectPicture) }
-        Log.d("CorrectImages", "${correctImages.size}")
 
         // Izračun grešaka:
         // 1. Broj krivo odabranih slika (neispravne slike koje su odabrane)
         val incorrectSelected = nonCarImages.size
-        Log.d("IncorrectSelected", "$incorrectSelected")
 
         // 2. Broj ispravnih slika koje nisu odabrane
         val unselectedCorrectImages = correctImages.filter { !selectedImages.contains(it) }.size
-        Log.d("UnselectedCorrectImages", "$unselectedCorrectImages")
 
         // Ukupni broj grešaka
         val totalErrors = incorrectSelected + unselectedCorrectImages
-        Log.d("Errors", "Total errors: $totalErrors")
 
-        val userAudioResponse = binding.etAudioInput.text.toString().trim()
+        return totalErrors
+    }
+
+    private fun calculateAudioErrors() : Int {
+        val userAudioResponse = binding.audioTaskInput.text.toString().trim()
         val correctAudioAnswer = selectedAudioFileName ?: ""
-        val audioErrors = if (userAudioResponse.equals(correctAudioAnswer, ignoreCase = true)) 0 else 1
+        return if (userAudioResponse.equals(correctAudioAnswer, ignoreCase = true)) 0 else 1
+    }
 
-        // Izračunaj vrijeme izvršavanja
+    private fun calculateExecutionTime() : Double {
         val endTime = System.currentTimeMillis()
         val executionTime = endTime - startTime
-        val executionTimeInSeconds = executionTime / 1000.0 // Pretvorba u sekunde
+        return executionTime / 1000.0 // Pretvorba u sekunde
+    }
 
-        // Spremi rezultate u Firebase
-        val results = mapOf(
-            "stringErrors" to stringErrors,
-            "mathErrors" to mathErrors,
-            "imageErrors" to totalErrors,
-            "sortErrors" to totalSortErrors,
-            "audioErrors" to audioErrors,
-            "sequenceRememberErrors" to totalSequenceErrors,
-            "executionTime" to executionTimeInSeconds,
-            "adType" to currentAdType,
-            "adPosition" to currentAdPoisition
-        )
-        val testIndex = "test${currentTaskIndex + 1}"
-        database.child("results").child(userId).child(testIndex).setValue(results)
-
+    private fun proceedToNextTaskActions() {
         // Pređi na sljedeći zadatak
         currentTaskIndex++
         // Resetiraj RecyclerView sa novim slikama
         resetRecyclerView()
         loadNextTask()
         binding.scrollView.smoothScrollTo(0, 0)
-        binding.etStringInput.requestFocus()
 
-        // Sakrij tipkovnicu
-        val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
-        inputMethodManager.hideSoftInputFromWindow(binding.etStringInput.windowToken, 0)
+        hideKeyboard()
     }
 
-    private fun evaluateMathExpression(expression: String): String {
-        // Evaluacija jednostavnih matematičkih izraza (samo zbrajanje za sada)
-        return try {
-            val parts = expression.split("+").map { it.trim().toInt() }
-            (parts[0] + parts[1]).toString()
-        } catch (e: Exception) {
-            "0"
+    private fun hideKeyboard() {
+        val inputMethodManager = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        inputMethodManager.hideSoftInputFromWindow(binding.stringCompareTaskInput.windowToken, 0)
+    }
+
+    private fun evaluateMathTask(task: String): Int {
+        val parts = task.split(" ")
+        val number1 = parts[0].toInt()
+        val operation = parts[1]
+        val number2 = parts[2].toInt()
+
+        return when (operation) {
+            "+" -> number1 + number2
+            "-" -> number1 - number2
+            "*" -> number1 * number2
+            else -> throw IllegalArgumentException("Invalid operation")
         }
     }
+
 
     private fun calculateLevenshteinDistance(s1: String, s2: String): Int {
         val lenStr1 = s1.length
@@ -454,7 +464,7 @@ class TaskActivity : AppCompatActivity() {
             mp.isLooping = true
             videoView.start()
         }
-        videoView.setOnErrorListener { mp, what, extra ->
+        videoView.setOnErrorListener { _, what, extra ->
             Log.e("VideoAd", "Error: $what, $extra")
             true
         }
