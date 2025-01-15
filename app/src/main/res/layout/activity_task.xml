@@ -176,8 +176,6 @@
                 android:layout_height="wrap_content"
                 android:text="Submit Task" />
 
-
-
         </LinearLayout>
     </ScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>

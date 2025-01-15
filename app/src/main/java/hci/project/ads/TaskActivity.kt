@@ -97,10 +97,10 @@ class TaskActivity : AppCompatActivity() {
 
         database = FirebaseDatabase.getInstance("https://hci-projekt-cb805-default-rtdb.europe-west1.firebasedatabase.app").reference
 
+        binding.btnSubmitTask.setOnClickListener { onSubmitTask() }
+
         setupRecyclerView()
         loadNextTask()
-        binding.stringCompareTaskInput.requestFocus()
-        binding.btnSubmitTask.setOnClickListener { onSubmitTask() }
     }
 
     private fun setupRecyclerView() {
@@ -119,6 +119,8 @@ class TaskActivity : AppCompatActivity() {
             finish()
             return
         }
+
+        currentFocus?.clearFocus()
 
         initializeAdTypeAdPosition()
         initializeSortSequenceTask()
@@ -163,9 +165,11 @@ class TaskActivity : AppCompatActivity() {
         binding.sequenceShowButton.setOnClickListener {
             binding.sequenceTextView.visibility = View.VISIBLE
             binding.sequenceShowButton.visibility = View.GONE
+            binding.sequenceUserInputText.visibility = View.GONE
 
             Handler(Looper.getMainLooper()).postDelayed({
                 binding.sequenceTextView.visibility = View.GONE
+                binding.sequenceUserInputText.visibility = View.VISIBLE
             }, sequenceDisplayTime)
         }
     }
@@ -388,7 +392,6 @@ class TaskActivity : AppCompatActivity() {
         resetRecyclerView()
         loadNextTask()
         binding.scrollView.smoothScrollTo(0, 0)
-        binding.stringCompareTaskInput.requestFocus()
 
         hideKeyboard()
     }
