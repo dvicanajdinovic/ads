@@ -12,8 +12,13 @@ import android.view.View
 import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.LinearLayout
+import android.widget.RadioButton
+import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
@@ -35,6 +40,7 @@ class TaskActivity : AppCompatActivity() {
     private lateinit var currentAdType: String
     private lateinit var currentAdPoisition: String
     private lateinit var sortedNumbers: List<Int>
+    private lateinit var correctSentenceOrder: String
 
     private val userId = "user_${UUID.randomUUID()}" // Generiraj jednistveni ID za korisnika
     private val adCombinations = listOf(
@@ -57,6 +63,13 @@ class TaskActivity : AppCompatActivity() {
     private val stringTasks = listOf(
         "riba ribi grize rep",
         "maca maci grize rep"
+    )
+
+    private val correctOrderSentences = listOf(
+        "Crveni auto se vozi cestom",
+        "Pas trči po parku",
+        "Maca pije mlijeko",
+        "Ptica leti iznad mora"
     )
 
     private val pictureTypes = listOf(
@@ -128,6 +141,7 @@ class TaskActivity : AppCompatActivity() {
         setupRememberSequence()
         setupStringTask()
         setupMathTask()
+        setupSentenceTask()
         clearUserInputs()
         hideKeyboard()
 
@@ -288,6 +302,7 @@ class TaskActivity : AppCompatActivity() {
         val rememberSequenceErrors = calculateRememberSequenceErrors()
         val totalPictureErrors = calculatePictureErrors()
         val audioErrors = calculateAudioErrors()
+        val sentenceOrderErrors = calculateSentenceOrderErrors()
         val executionTimeInSeconds = calculateExecutionTime()
 
         // Spremi rezultate u Firebase
@@ -298,6 +313,7 @@ class TaskActivity : AppCompatActivity() {
             "sortErrors" to sortErrors,
             "audioErrors" to audioErrors,
             "sequenceRememberErrors" to rememberSequenceErrors,
+            "sentenceOrderErrors" to sentenceOrderErrors,
             "executionTime" to executionTimeInSeconds,
             "adType" to currentAdType,
             "adPosition" to currentAdPoisition
@@ -552,5 +568,70 @@ class TaskActivity : AppCompatActivity() {
         adContainer.removeAllViews()
         Log.d("Ads", "Ad container cleared.")
     }
+
+    private fun getRandomShuffledSentence(): List<String> {
+        correctSentenceOrder = correctOrderSentences.random()
+        val words = correctSentenceOrder.split(" ")
+        return words.shuffled()
+    }
+
+    private fun setupSentenceTask() {
+        binding.wordContainer.removeAllViews()
+        val shuffledWords = getRandomShuffledSentence()
+        shuffledWords.forEach { word ->
+            val wordLayout = LinearLayout(this).apply {
+                orientation = LinearLayout.HORIZONTAL
+            }
+
+            val textView = TextView(this).apply {
+                text = word
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            val spinner = Spinner(this).apply {
+                val numbers = (1..shuffledWords.size).toList()
+                adapter = ArrayAdapter(this@TaskActivity, android.R.layout.simple_spinner_item, numbers).apply {
+                    setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                }
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            }
+
+            wordLayout.addView(textView)
+            wordLayout.addView(spinner)
+            binding.wordContainer.addView(wordLayout)
+        }
+    }
+
+    private fun calculateSentenceOrderErrors(): Int {
+        val wordToCorrectPosition = correctSentenceOrder.split(" ").mapIndexed { index, word -> word to (index + 1) }.toMap()
+        var errors = 0
+
+        for (i in 0 until binding.wordContainer.childCount) {
+            val wordLayout = binding.wordContainer.getChildAt(i) as LinearLayout
+            val textView = wordLayout.getChildAt(0) as TextView
+            val spinner = wordLayout.getChildAt(1) as Spinner
+
+            val word = textView.text.toString()
+            val selectedPosition = spinner.selectedItem as Int
+            val correctPosition = wordToCorrectPosition[word]
+
+            if (selectedPosition != correctPosition) {
+                errors++
+            }
+        }
+
+        return errors
+    }
+
+
+
+
+
 
 }
