@@ -164,7 +164,8 @@ class TaskActivity : AppCompatActivity() {
             numbers.sortedDescending()
         }
         val sortOrderText = if (isAscending) {
-            "Sortiraj ove brojeve uzlazno: "
+            "" +
+                    "Sortiraj ove brojeve uzlazno: "
         } else {
             "Sortiraj ove brojeve silazno: "
         }
