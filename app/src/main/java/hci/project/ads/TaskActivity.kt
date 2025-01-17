@@ -473,7 +473,7 @@ class TaskActivity : AppCompatActivity() {
     private fun createVideoAd(position: String): View {
         clearAdContainer()
         videoView = VideoView(this)
-        val uri = Uri.parse("android.resource://$packageName/${R.raw.video_ad}")
+        val uri = Uri.parse("android.resource://$packageName/${R.raw.mickey}")
         videoView.setVideoURI(uri)
         val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300) // Jednake dimenzije
         videoView.layoutParams = layoutParams
