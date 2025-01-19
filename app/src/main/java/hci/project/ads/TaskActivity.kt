@@ -61,8 +61,21 @@ class TaskActivity : AppCompatActivity() {
     )
 
     private val stringTasks = listOf(
-        "riba ribi grize rep",
-        "maca maci grize rep"
+        "vani vlada trepet i tama",
+        "svjetlost obasjava trijem",
+        "galeb se kupa kod fontane",
+        "razbila se kristalna vaza",
+        "sjene prate uski puteljak",
+        "zalijepi ih u plavi album",
+        "hladne kapi klize staklom",
+        "tanka se ogrlica potrgala",
+        "papir se leluja na vjetru",
+        "usidrio se francuski brod",
+        "kupila sam lijepi suvenir",
+        "nove su grane procvjetale",
+        "jato je proletjelo parkom",
+        "postavljen je ogroman bor",
+        "fina torta je u hladnjaku"
     )
 
     private val correctOrderSentences = listOf(
@@ -72,29 +85,13 @@ class TaskActivity : AppCompatActivity() {
         "Ptica leti iznad mora"
     )
 
-    private val pictureTypes = listOf(
-        "car",
-        "slon"
-    )
+    private val pictureTypes = listOf("car", "slon", "cat", "castle", "firework", "mouse")
 
-    private val imagesInDrawable = listOf(
-        R.drawable.car1,
-        R.drawable.car2,
-        R.drawable.car3,
-        R.drawable.car4,
-        R.drawable.non1,
-        R.drawable.non2,
-        R.drawable.non3,
-        R.drawable.non4,
-        R.drawable.slon1,
-        R.drawable.slon2,
-        R.drawable.slon3,
-        R.drawable.slon4,
-        R.drawable.non5,
-        R.drawable.non6,
-        R.drawable.non7,
-        R.drawable.non8
-    )
+    private val imagesInDrawable: List<Int> by lazy {
+        R.drawable::class.java.fields
+            .filter { field -> pictureTypes.any { field.name.startsWith(it) } }
+            .map { it.getInt(null) }
+    }
 
     private var selectedAudioFileName: String? = null
     private var currentTaskIndex = 0
@@ -116,6 +113,7 @@ class TaskActivity : AppCompatActivity() {
         loadNextTask()
     }
 
+    //Premjesti
     private fun setupRecyclerView() {
         val selectedImages = selectRandomImages() // Nasumično odaberi 6 slika
         binding.rvImageSelection.layoutManager = GridLayoutManager(this, 2)
@@ -212,17 +210,27 @@ class TaskActivity : AppCompatActivity() {
         return List(randomSequenceLength) { random.nextInt(0, 10) }
     }
 
+    //Premjesti
     private fun selectRandomImages(): List<Int> {
         currentCorrectPicture = pictureTypes.random()
-        // Nasumično odaberi 6 slika iz tog direktorija
-        return imagesInDrawable.shuffled().take(6)
-    }
 
+        // Exclude "non" images and randomly select 6
+        val filteredImages = imagesInDrawable.filter { id ->
+            val resourceName = R.drawable::class.java.fields.find { it.getInt(null) == id }?.name
+            resourceName?.startsWith("non") == false
+        }
+        return filteredImages.shuffled().take(6)
+    }
+    //Premjesti
     private fun updateImageInstructionText(directoryName: String) {
         val instructionText = when (directoryName) {
-            "car" -> "Izaberi slike gdje se nalazi auto"
-            "slon" -> "Izaberi slike gdje se nalazi slon"
-            else -> "Izaberi slike"
+            "car" -> "Označi automobile."
+            "slon" -> "Označi slonove."
+            "cat" -> "Označi mačke."
+            "firework" -> "Označi vatromet."
+            "mouse" -> "Označi miševe."
+            "castle" -> "Označi dvorce."
+            else -> "Izaberi slike."
         }
         binding.imageTaskInstruction.text = instructionText
     }
@@ -257,6 +265,7 @@ class TaskActivity : AppCompatActivity() {
         }
     }
 
+    //Premjesti
     private fun resetRecyclerView() {
         // Nasumično odaberi 6 novih slika
         val newSelectedImages = selectRandomImages()
@@ -367,6 +376,7 @@ class TaskActivity : AppCompatActivity() {
         return totalSequenceErrors
     }
 
+    // Premjesti
     private fun calculatePictureErrors() : Int {
         val selectedImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.selectedImages ?: emptySet()
         val allImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.getAllImages() ?: emptyList()

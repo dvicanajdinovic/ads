@@ -10,7 +10,7 @@
     <!-- Prostor za reklame -->
     <FrameLayout
         android:id="@+id/adContainer"
-        android:layout_width="160dp"
+        android:layout_width="150dp"
         android:layout_height="match_parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -25,7 +25,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@id/adContainer"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginStart="16dp"
+        android:layout_marginStart="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="16dp">
@@ -68,24 +68,24 @@
                 android:inputType="numberSigned"
                 android:layout_marginBottom="8dp" />
 
+            <!-- Image task instructions -->
             <TextView
                 android:id="@+id/imageTaskInstruction"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="Izaberi slike gdje se nalazi auto"
                 android:textSize="18sp"
-                android:textColor="@android:color/black"
-                android:layout_gravity="center_horizontal"/>
+                android:textColor="@android:color/black" />
 
-            <!-- RecyclerView za odabir slika -->
+            <!-- RecyclerView for image selection -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvImageSelection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="visible"
                 android:layout_marginBottom="16dp"
                 tools:listitem="@layout/item_image_selection" />
+
 
             <!-- Zadatak za sortiranje brojeva -->
             <TextView
