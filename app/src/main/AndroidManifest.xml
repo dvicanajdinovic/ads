@@ -36,6 +36,7 @@
 
         <activity android:name=".TypingTestActivity"></activity>
         <activity android:name=".MathTestActivity"></activity>
+        <activity android:name=".StartActivity" />
 
     </application>
 
