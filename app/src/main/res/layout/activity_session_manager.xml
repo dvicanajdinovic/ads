@@ -1,26 +1,106 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:gravity="center"
-    android:background="@color/white">
+    android:padding="16dp">
 
-    <TextView
-        android:id="@+id/tvSessionCompleted"
+    <ScrollView
+        android:id="@+id/finish_instructions"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="8dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="16dp"
+                app:cardCornerRadius="24dp"
+                app:cardBackgroundColor="@color/white"
+                app:strokeWidth="3dp"
+                app:strokeColor="@color/purple_200"
+                app:cardElevation="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="24dp">
+
+                    <TextView
+                        android:id="@+id/instruction_page_1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/message_task_completed"
+                        android:textSize="18sp"
+                        android:textColor="@color/black"
+                        android:paddingBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/instruction_page_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/message_data_collected"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black"
+                        android:paddingBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/instruction_page_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/message_thank_you"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+        </LinearLayout>
+    </ScrollView>
+
+
+    <RelativeLayout
+        android:id="@+id/btnReturnToMain"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Session Completed!"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        android:layout_centerInParent="true"
-        android:textColor="@color/black" />
+        android:layout_margin="16dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:background="@drawable/bg_restart_button"
+        android:padding="8dp"
+        android:elevation="8dp">
 
-    <Button
-        android:id="@+id/btnNextSession"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/tvSessionCompleted"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:text="Start Next Session" />
-</RelativeLayout>
+        <!-- Text First -->
+        <TextView
+            android:id="@+id/play_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_alignParentStart="true"
+            android:text="@string/title_return_button"
+            android:layout_marginStart="10dp"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/play_icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_toEndOf="@id/play_text"
+            android:contentDescription="Play Icon"
+            app:srcCompat="@drawable/ic_restart"
+            android:tint="@android:color/white" />
+    </RelativeLayout>
+</LinearLayout>

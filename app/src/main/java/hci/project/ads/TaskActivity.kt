@@ -1,6 +1,7 @@
 package hci.project.ads
 
 
+import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
@@ -26,6 +27,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import hci.project.ads.databinding.ActivityTaskBinding
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 import kotlin.random.Random
 
@@ -90,7 +94,8 @@ class TaskActivity : AppCompatActivity() {
     private fun loadNextTask() {
 
         if (currentTaskIndex >= adCombinations.size) {
-            Toast.makeText(this, "Session completed!", Toast.LENGTH_LONG).show()
+            val intent = Intent(this, SessionManagerActivity::class.java)
+            startActivity(intent)
             finish()
             return
         }
@@ -282,6 +287,9 @@ class TaskActivity : AppCompatActivity() {
         val audioErrors = calculateAudioErrors()
         val sentenceOrderErrors = calculateSentenceOrderErrors()
         val executionTimeInSeconds = calculateExecutionTime()
+        val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
+            Date()
+        )
 
         // Spremi rezultate u Firebase
         val results = mapOf(
@@ -294,7 +302,8 @@ class TaskActivity : AppCompatActivity() {
             "sentenceOrderErrors" to sentenceOrderErrors,
             "executionTime" to executionTimeInSeconds,
             "adType" to currentAdType,
-            "adPosition" to currentAdPoisition
+            "adPosition" to currentAdPoisition,
+            "timestamp" to timestamp
         )
 
         val testIndex = "test${currentTaskIndex + 1}"

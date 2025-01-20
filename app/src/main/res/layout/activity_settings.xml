@@ -12,6 +12,4 @@
         android:text="Settings"
         android:textSize="24sp"
         android:layout_gravity="center"/>
-
-    <!-- Add other settings UI elements like Checkboxes, Switches, etc. -->
 </LinearLayout>

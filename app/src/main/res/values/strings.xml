@@ -7,4 +7,8 @@
     <string name="nav_header_desc">Navigation header</string>
     <string name="action_settings">Settings</string>
     <string name="title_start_button">POKRENI TEST</string>
+    <string name="title_return_button">VRATI ME NA POČETAK</string>
+    <string name="message_task_completed">Svi su zadatci uspješno izvršeni.</string>
+    <string name="message_data_collected">Vaši su rezultati zabilježeni u bazi podataka i spremni za analizu.</string>
+    <string name="message_thank_you">Zahvaljujemo se na izdvojenom vremenu i strpljenju.</string>
 </resources>

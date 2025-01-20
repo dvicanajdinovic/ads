@@ -2,30 +2,25 @@ package hci.project.ads
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import hci.project.ads.databinding.ActivitySessionManagerBinding
 
 class SessionManagerActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivitySessionManagerBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_session_manager)
 
-        val btnNextSession: Button = findViewById(R.id.btnNextSession)
-        btnNextSession.setOnClickListener {
-            val isFinalSession = intent.getBooleanExtra("isFinalSession", false)
+        // Use binding to inflate the layout
+        binding = ActivitySessionManagerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-            if (isFinalSession) {
-                // If it's the final session, navigate back to the main screen
-                val intent = Intent(this, MainActivity::class.java)
-                startActivity(intent)
-                finish()
-            } else {
-                // Otherwise, just proceed to the next task
-                finish() // Close this activity
-            }
+        // Set click listener for the button
+        binding.btnReturnToMain.setOnClickListener {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
         }
     }
 }
