@@ -57,4 +57,5 @@ class ImageSelectionAdapter(
     fun getAllImages(): List<Int> {
         return images
     }
+
 }

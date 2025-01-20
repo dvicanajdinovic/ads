@@ -51,7 +51,8 @@ class TaskHelper {
 
     fun loadAudioFileNames(): List<String> {
         return listOf(
-            "keyboard", "tenisice"
+            "bojice", "tenisice", "fotografije", "haljina", "kalendar", "kontrabas", "medvjed",
+            "oblaci", "pokloni", "potkrovlje", "razglednica", "snijeg", "ulaznica"
         )
     }
 

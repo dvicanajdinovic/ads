@@ -16,6 +16,7 @@ import android.widget.ArrayAdapter
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RadioButton
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -25,9 +26,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import hci.project.ads.databinding.ActivityTaskBinding
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 import java.util.UUID
 import kotlin.random.Random
 
@@ -177,14 +175,28 @@ class TaskActivity : AppCompatActivity() {
     }
 
     private fun selectRandomImages(): List<Int> {
+        // Odaberi tip fotografije koji treba označiti.
         currentCorrectPicture = pictureTypes.random()
 
-        // Exclude "non" images and randomly select 6
+        // Makni sve "non" fotografije
         val filteredImages = imagesInDrawable.filter { id ->
             val resourceName = R.drawable::class.java.fields.find { it.getInt(null) == id }?.name
             resourceName?.startsWith("non") == false
         }
-        return filteredImages.shuffled().take(6)
+
+        // Barem dvije ponuđene fotografije u tasku odgovaraju točnom odabiru.
+        val matchingImages = filteredImages.filter { id ->
+            val resourceName = R.drawable::class.java.fields.find { it.getInt(null) == id }?.name
+            resourceName?.contains(currentCorrectPicture) == true
+        }.shuffled().take(2)
+
+        // Odaberi ostala moguća rješenja.
+        val remainingImages = (filteredImages - matchingImages).shuffled().take(4)
+
+        // Kreiraj konačan odabir.
+        val allSelectedImages = (matchingImages + remainingImages).shuffled()
+
+        return allSelectedImages
     }
 
     private fun updateImageInstructionText(directoryName: String) {
@@ -270,9 +282,6 @@ class TaskActivity : AppCompatActivity() {
         val audioErrors = calculateAudioErrors()
         val sentenceOrderErrors = calculateSentenceOrderErrors()
         val executionTimeInSeconds = calculateExecutionTime()
-        val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
-            Date()
-        )
 
         // Spremi rezultate u Firebase
         val results = mapOf(
@@ -285,8 +294,7 @@ class TaskActivity : AppCompatActivity() {
             "sentenceOrderErrors" to sentenceOrderErrors,
             "executionTime" to executionTimeInSeconds,
             "adType" to currentAdType,
-            "adPosition" to currentAdPoisition,
-            "timestamp" to timestamp,
+            "adPosition" to currentAdPoisition
         )
 
         val testIndex = "test${currentTaskIndex + 1}"
@@ -336,7 +344,6 @@ class TaskActivity : AppCompatActivity() {
         return totalSequenceErrors
     }
 
-    // Premjesti
     private fun calculatePictureErrors() : Int {
         val selectedImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.selectedImages ?: emptySet()
         val allImages = (binding.rvImageSelection.adapter as? ImageSelectionAdapter)?.getAllImages() ?: emptyList()
