@@ -16,7 +16,6 @@ import android.widget.ArrayAdapter
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RadioButton
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
@@ -26,6 +25,9 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import hci.project.ads.databinding.ActivityTaskBinding
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import java.util.UUID
 import kotlin.random.Random
 
@@ -268,6 +270,9 @@ class TaskActivity : AppCompatActivity() {
         val audioErrors = calculateAudioErrors()
         val sentenceOrderErrors = calculateSentenceOrderErrors()
         val executionTimeInSeconds = calculateExecutionTime()
+        val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
+            Date()
+        )
 
         // Spremi rezultate u Firebase
         val results = mapOf(
@@ -280,7 +285,8 @@ class TaskActivity : AppCompatActivity() {
             "sentenceOrderErrors" to sentenceOrderErrors,
             "executionTime" to executionTimeInSeconds,
             "adType" to currentAdType,
-            "adPosition" to currentAdPoisition
+            "adPosition" to currentAdPoisition,
+            "timestamp" to timestamp,
         )
 
         val testIndex = "test${currentTaskIndex + 1}"
