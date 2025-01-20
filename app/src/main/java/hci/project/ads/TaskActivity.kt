@@ -61,6 +61,7 @@ class TaskActivity : AppCompatActivity() {
             .map { it.getInt(null) }
     }
 
+    private var isTestMode: Boolean = false
     private var selectedAudioFileName: String? = null
     private var currentTaskIndex = 0
     private var startTime: Long = 0L
@@ -77,11 +78,13 @@ class TaskActivity : AppCompatActivity() {
 
         binding.btnSubmitTask.setOnClickListener { onSubmitTask() }
 
+        isTestMode = intent.getBooleanExtra("isTestMode", false)
+
         setupRecyclerView()
         loadNextTask()
     }
 
-    //Premjesti
+
     private fun setupRecyclerView() {
         val selectedImages = selectRandomImages() // Nasumično odaberi 6 slika
         binding.rvImageSelection.layoutManager = GridLayoutManager(this, 2)
@@ -291,24 +294,32 @@ class TaskActivity : AppCompatActivity() {
             Date()
         )
 
-        // Spremi rezultate u Firebase
-        val results = mapOf(
-            "stringErrors" to stringErrors,
-            "mathErrors" to mathErrors,
-            "imageErrors" to totalPictureErrors,
-            "sortErrors" to sortErrors,
-            "audioErrors" to audioErrors,
-            "sequenceRememberErrors" to rememberSequenceErrors,
-            "sentenceOrderErrors" to sentenceOrderErrors,
-            "executionTime" to executionTimeInSeconds,
-            "adType" to currentAdType,
-            "adPosition" to currentAdPoisition,
-            "timestamp" to timestamp
-        )
+        if (!isTestMode) {
+            // Spremi rezultate u bazu.
+            val results = mapOf(
+                "stringErrors" to stringErrors,
+                "mathErrors" to mathErrors,
+                "imageErrors" to totalPictureErrors,
+                "sortErrors" to sortErrors,
+                "audioErrors" to audioErrors,
+                "sequenceRememberErrors" to rememberSequenceErrors,
+                "sentenceOrderErrors" to sentenceOrderErrors,
+                "executionTime" to executionTimeInSeconds,
+                "adType" to currentAdType,
+                "adPosition" to currentAdPoisition,
+                "timestamp" to timestamp
+            )
+            // Kreni na sljedeći zadatak.
+            val testIndex = "test${currentTaskIndex + 1}"
+            database.child("results").child(userId).child(testIndex).setValue(results)
+            proceedToNextTaskActions()
+        } else {
+            val intent = Intent(this, MainActivity::class.java)
+            startActivity(intent)
+            finish()
+            return
+        }
 
-        val testIndex = "test${currentTaskIndex + 1}"
-        database.child("results").child(userId).child(testIndex).setValue(results)
-        proceedToNextTaskActions()
     }
 
     private fun calculateStringErrors() : Int {
@@ -340,14 +351,14 @@ class TaskActivity : AppCompatActivity() {
         val userNumbersRemember =
             userInputRemember.split(",").mapNotNull { it.trim().toIntOrNull() }
 
-        // Provjeri koliko brojeva korisnik unosi
+        // Provjeri koliko brojeva korisnik unosi.
         val missingNumbersCount = sequence.size - userNumbersRemember.size
 
         val sequenceNumberRememberErrors = userNumbersRemember.zip(sequence) { userNumber, correctNumber ->
             userNumber != correctNumber
         }.count { it }
 
-        // Dodaj greške za neunesene brojeve
+        // Dodaj greške za neunesene brojeve.
         val totalSequenceErrors = sequenceNumberRememberErrors + missingNumbersCount
 
         return totalSequenceErrors
@@ -389,9 +400,9 @@ class TaskActivity : AppCompatActivity() {
     }
 
     private fun proceedToNextTaskActions() {
-        // Pređi na sljedeći zadatak
         currentTaskIndex++
-        // Resetiraj RecyclerView sa novim slikama
+
+        // Resetiraj RecyclerView sa novim slikama.
         resetRecyclerView()
         loadNextTask()
         binding.scrollView.smoothScrollTo(0, 0)
