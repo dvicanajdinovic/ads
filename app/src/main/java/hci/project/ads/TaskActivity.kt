@@ -42,50 +42,14 @@ class TaskActivity : AppCompatActivity() {
     private lateinit var sortedNumbers: List<Int>
     private lateinit var correctSentenceOrder: String
 
+    private val taskHelper = TaskHelper()
     private val userId = "user_${UUID.randomUUID()}" // Generiraj jednistveni ID za korisnika
-    private val adCombinations = listOf(
-        Pair("static", "top_right"),
-        Pair("static", "middle_right"),
-        Pair("static", "bottom_right"),
-        Pair("video", "top_right"),
-        Pair("video", "middle_right"),
-        Pair("video", "bottom_right"),
-        Pair("blinking", "top_right"),
-        Pair("blinking", "middle_right"),
-        Pair("blinking", "bottom_right")
-    ).shuffled()
+    private val adCombinations = taskHelper.loadCombinations()
 
-    private val audioFileNames = listOf(
-        "keyboard",
-        "tenisice"
-    )
-
-    private val stringTasks = listOf(
-        "vani vlada trepet i tama",
-        "svjetlost obasjava trijem",
-        "galeb se kupa kod fontane",
-        "razbila se kristalna vaza",
-        "sjene prate uski puteljak",
-        "zalijepi ih u plavi album",
-        "hladne kapi klize staklom",
-        "tanka se ogrlica potrgala",
-        "papir se leluja na vjetru",
-        "usidrio se francuski brod",
-        "kupila sam lijepi suvenir",
-        "nove su grane procvjetale",
-        "jato je proletjelo parkom",
-        "postavljen je ogroman bor",
-        "fina torta je u hladnjaku"
-    )
-
-    private val correctOrderSentences = listOf(
-        "Crveni auto se vozi cestom",
-        "Pas trči po parku",
-        "Maca pije mlijeko",
-        "Ptica leti iznad mora"
-    )
-
-    private val pictureTypes = listOf("car", "slon", "cat", "castle", "firework", "mouse")
+    private val audioFileNames = taskHelper.loadAudioFileNames()
+    private val stringTasks = taskHelper.typingTestPhrases()
+    private val correctOrderSentences = taskHelper.correctOrderPhrases()
+    private val pictureTypes = taskHelper.loadImageKeywords()
 
     private val imagesInDrawable: List<Int> by lazy {
         R.drawable::class.java.fields
@@ -210,7 +174,6 @@ class TaskActivity : AppCompatActivity() {
         return List(randomSequenceLength) { random.nextInt(0, 10) }
     }
 
-    //Premjesti
     private fun selectRandomImages(): List<Int> {
         currentCorrectPicture = pictureTypes.random()
 
@@ -221,17 +184,9 @@ class TaskActivity : AppCompatActivity() {
         }
         return filteredImages.shuffled().take(6)
     }
-    //Premjesti
+
     private fun updateImageInstructionText(directoryName: String) {
-        val instructionText = when (directoryName) {
-            "car" -> "Označi automobile."
-            "slon" -> "Označi slonove."
-            "cat" -> "Označi mačke."
-            "firework" -> "Označi vatromet."
-            "mouse" -> "Označi miševe."
-            "castle" -> "Označi dvorce."
-            else -> "Izaberi slike."
-        }
+        val instructionText = taskHelper.getInstructionText(directoryName)
         binding.imageTaskInstruction.text = instructionText
     }
 
@@ -265,7 +220,6 @@ class TaskActivity : AppCompatActivity() {
         }
     }
 
-    //Premjesti
     private fun resetRecyclerView() {
         // Nasumično odaberi 6 novih slika
         val newSelectedImages = selectRandomImages()
@@ -639,10 +593,4 @@ class TaskActivity : AppCompatActivity() {
 
         return errors
     }
-
-
-
-
-
-
 }
