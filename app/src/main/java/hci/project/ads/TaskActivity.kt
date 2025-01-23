@@ -53,6 +53,9 @@ class TaskActivity : AppCompatActivity() {
     private val stringTasks = taskHelper.typingTestPhrases()
     private val correctOrderSentences = taskHelper.correctOrderPhrases()
     private val pictureTypes = taskHelper.loadImageKeywords()
+    private val videoAds = taskHelper.loadVideoAdNames()
+    private val staticAds = taskHelper.loadStaticAdNames()
+    private val blinkingAds = taskHelper.loadBlinkingAdNames()
 
     private val imagesInDrawable: List<Int> by lazy {
         R.drawable::class.java.fields
@@ -62,6 +65,9 @@ class TaskActivity : AppCompatActivity() {
 
     private var isTestMode: Boolean = false
     private var selectedAudioFileName: String? = null
+    private var selectedVideoAdName: String? = null
+    private var selectedStaticAdName: String? = null
+    private var selectedBlinkingAdName: String? = null
     private var currentTaskIndex = 0
     private var startTime: Long = 0L
     private var sequence: List<Int> = emptyList()
@@ -458,11 +464,21 @@ class TaskActivity : AppCompatActivity() {
     // Funkcije za stvaranje reklama
     private fun createStaticAd(position: String): View {
         clearAdContainer()
+        selectedStaticAdName = staticAds.random()
+
         val ad = ImageView(this)
-        ad.setImageResource(R.drawable.static_ad)
+
+        val resId = resources.getIdentifier(selectedStaticAdName, "drawable", packageName)
+
+        if (resId != 0) {
+            ad.setImageResource(resId)
+        } else {
+            Log.e("StaticAd", "Static ad resource not found for: $selectedStaticAdName")
+        }
+
         val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300) // Jednake dimenzije
         ad.layoutParams = layoutParams
-        ad.scaleType = ImageView.ScaleType.CENTER_CROP
+        ad.scaleType = ImageView.ScaleType.FIT_XY
         setAdPosition(ad, position) // Postavi poziciju
         return ad
     }
@@ -471,10 +487,20 @@ class TaskActivity : AppCompatActivity() {
     private fun createVideoAd(position: String): View {
         clearAdContainer()
         videoView = VideoView(this)
-        val uri = Uri.parse("android.resource://$packageName/${R.raw.mickey}")
-        videoView.setVideoURI(uri)
+        selectedVideoAdName = videoAds.random()
+
+        val resId = resources.getIdentifier(selectedVideoAdName, "raw", packageName)
+
+        if (resId != 0) {
+            val uri = Uri.parse("android.resource://$packageName/$resId")
+            videoView.setVideoURI(uri)
+        } else {
+            Log.e("VideoAd", "Video resource not found for: $selectedVideoAdName")
+        }
+
         val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300) // Jednake dimenzije
         videoView.layoutParams = layoutParams
+
         videoView.setOnPreparedListener { mp ->
             mp.isLooping = true
             videoView.start()
@@ -512,11 +538,20 @@ class TaskActivity : AppCompatActivity() {
 
     private fun createBlinkingAd(position: String): View {
         clearAdContainer() // Ukloni postojeće prikaze i animacije
+        selectedBlinkingAdName = blinkingAds.random()
         blinkingAd = ImageView(this)
-        blinkingAd.setImageResource(R.drawable.blinking_ad) // Postavi sliku za titranje
+
+        val resId = resources.getIdentifier(selectedBlinkingAdName, "drawable", packageName)
+
+        if (resId != 0) {
+            blinkingAd.setImageResource(resId)
+        } else {
+            Log.e("BlinkingAd", "Blinking ad resource not found for: $selectedBlinkingAdName")
+        }
+
         val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300) // Jednake dimenzije
         blinkingAd.layoutParams = layoutParams
-        blinkingAd.scaleType = ImageView.ScaleType.CENTER_CROP
+        blinkingAd.scaleType = ImageView.ScaleType.FIT_XY
         // Dodaj animaciju za titranje
         blinkingAd.startAnimation(createBlinkingAnimation())
         setAdPosition(blinkingAd, position) // Postavi poziciju
