@@ -1,6 +1,7 @@
 package hci.project.ads
 
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
@@ -17,10 +18,8 @@ import android.widget.ArrayAdapter
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.RadioButton
 import android.widget.Spinner
 import android.widget.TextView
-import android.widget.Toast
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -76,7 +75,10 @@ class TaskActivity : AppCompatActivity() {
 
         database = FirebaseDatabase.getInstance("https://hci-projekt-cb805-default-rtdb.europe-west1.firebasedatabase.app").reference
 
-        binding.btnSubmitTask.setOnClickListener { onSubmitTask() }
+        binding.btnSubmitTask.setOnClickListener {
+            onSubmitTask()
+            showNextTaskDialog()
+        }
 
         isTestMode = intent.getBooleanExtra("isTestMode", false)
 
@@ -312,7 +314,6 @@ class TaskActivity : AppCompatActivity() {
             // Kreni na sljedeći zadatak.
             val testIndex = "test${currentTaskIndex + 1}"
             database.child("results").child(userId).child(testIndex).setValue(results)
-            proceedToNextTaskActions()
         } else {
             val intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
@@ -625,5 +626,19 @@ class TaskActivity : AppCompatActivity() {
         }
 
         return errors
+    }
+
+    private fun showNextTaskDialog() {
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Proceed to Next Task?")
+        builder.setMessage("Would you like to continue to the next set of tasks?")
+
+        builder.setPositiveButton("Proceed") { dialog, _ ->
+            dialog.dismiss()
+            proceedToNextTaskActions()
+        }
+
+        val alertDialog: AlertDialog = builder.create()
+        alertDialog.show()
     }
 }
