@@ -23,7 +23,7 @@ class TaskHelper {
 
     fun correctOrderPhrases(): List<String> {
         return listOf(
-            "ne zaboravi me",
+            "ne zaboravi me nazvati",
             "upali svjetiljku na stolu",
             "kupi dva kilograma soli",
             "prisjeti se svoje mladosti",
@@ -34,12 +34,15 @@ class TaskHelper {
             "ne mogu dugo roniti",
             "potrudi se na instrukcijama",
             "fen je topao vjetar",
-            "visibabe imaju lukovicu",
+            "sve visibabe imaju lukovicu",
             "fotografirao je polarnu svjetlost",
-            "baterija ne radi kao prije",
-            "klima ne pogoduje uzgoju limuna",
-            "zaviri ispod tepiha",
-            "zamotaj kupljene poklone",
+            "baterija ne radi dobro",
+            "klima ne pogoduje limunu",
+            "zaviri ispod bijelog tepiha",
+            "sad zamotaj kupljene poklone",
+            "igrac je zabio gol",
+            "rijeka je osvojila kup",
+            "put je trajao dugo"
         )
     }
 
@@ -66,7 +69,8 @@ class TaskHelper {
             Pair("video", "bottom_right"),
             Pair("blinking", "top_right"),
             Pair("blinking", "middle_right"),
-            Pair("blinking", "bottom_right")
+            Pair("blinking", "bottom_right"),
+            Pair("noAd", "noPosition")
         ).shuffled()
     }
 

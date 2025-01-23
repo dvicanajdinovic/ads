@@ -284,6 +284,7 @@ class TaskActivity : AppCompatActivity() {
     }
 
     private fun onSubmitTask() {
+        val executionTimeInSeconds = calculateExecutionTime()
         val stringErrors = calculateStringErrors()
         val mathErrors = calculateMathErrors()
         val sortErrors = calculateSortErrors()
@@ -291,7 +292,6 @@ class TaskActivity : AppCompatActivity() {
         val totalPictureErrors = calculatePictureErrors()
         val audioErrors = calculateAudioErrors()
         val sentenceOrderErrors = calculateSentenceOrderErrors()
-        val executionTimeInSeconds = calculateExecutionTime()
         val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
             Date()
         )
