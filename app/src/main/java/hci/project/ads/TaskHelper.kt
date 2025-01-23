@@ -59,6 +59,24 @@ class TaskHelper {
         )
     }
 
+    fun loadVideoAdNames(): List<String> {
+        return listOf(
+            "caillou", "mickey"
+        )
+    }
+
+    fun loadStaticAdNames(): List<String> {
+        return listOf(
+            "static1", "static2", "static3", "static4", "static5"
+        )
+    }
+
+    fun loadBlinkingAdNames(): List<String> {
+        return listOf(
+            "blinking1", "blinking2"
+        )
+    }
+
     fun loadCombinations(): List<Pair<String, String>> {
         return listOf(
             Pair("static", "top_right"),
