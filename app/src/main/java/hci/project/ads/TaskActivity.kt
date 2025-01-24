@@ -1,6 +1,5 @@
 package hci.project.ads
 
-
 import android.app.AlertDialog
 import android.content.Intent
 import android.media.MediaPlayer
@@ -8,7 +7,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.text.Layout
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -41,6 +39,7 @@ import kotlin.random.Random
 
 class TaskActivity : AppCompatActivity() {
 
+    // Inicijaliziraj reklame i testove.
     private lateinit var binding: ActivityTaskBinding
     private lateinit var database: DatabaseReference
     private lateinit var videoView: VideoView
@@ -53,10 +52,17 @@ class TaskActivity : AppCompatActivity() {
     private lateinit var sortedNumbers: List<Int>
     private lateinit var correctSentenceOrder: String
 
+    // U klasi TaskHelper nalaze se dodatne pomoćne funkcije.
     private val taskHelper = TaskHelper()
+
+    // Svakom je korisniku dodijeljen ID.
     private val userId = "user_${UUID.randomUUID()}" // Generiraj jednistveni ID za korisnika
+
+    // Kombinacije vrste i pozicije reklama.
     private val adCombinations = taskHelper.loadCombinations()
 
+    // Učitaj sve moguće vrijednosti koje se pojavljuju u odgovarajućim vrstama zadataka.
+    // Učitaj sve moguće vrijednosti reklama.
     private val audioFileNames = taskHelper.loadAudioFileNames()
     private val stringTasks = taskHelper.typingTestPhrases()
     private val correctOrderSentences = taskHelper.correctOrderPhrases()
@@ -65,59 +71,80 @@ class TaskActivity : AppCompatActivity() {
     private val staticAds = taskHelper.loadStaticAdNames()
     private val blinkingAds = taskHelper.loadBlinkingAdNames()
 
-    // Prati iskorištene vrijednosti
+    // Prati iskorištene vrijednosti kako se zadatci ne bi ponavljali.
     private val seenAudioFiles = mutableListOf<String>()
     private val usedTypingTestPhrases = mutableListOf<String>()
     private val usedCorrectOrderSentences = mutableListOf<String>()
     private val usedPictureMotifs = mutableListOf<String>()
 
+    // Učitaj resurse iz mape drawable.
     private val imagesInDrawable: List<Int> by lazy {
         R.drawable::class.java.fields
             .filter { field -> pictureTypes.any { field.name.startsWith(it) } }
             .map { it.getInt(null) }
     }
 
+    // Pokreće li se aplikacija u probnom načinu rada?
     private var isTestMode: Boolean = false
+
+    // Inicijalizacija varijabli za pohranu trenutno odabranih rješenja.
     private var selectedAudioFileName: String? = null
     private var selectedVideoAdName: String? = null
     private var selectedStaticAdName: String? = null
     private var selectedBlinkingAdName: String? = null
+
+    // Ažuriraj na kojem se zadatku nalazi korisnik.
     private var currentTaskIndex = 0
-    private var startTime: Long = 0L
+
+    // Inicijacija varijabli za SortSequenceTask.
     private var sequence: List<Int> = emptyList()
     private val sequenceDisplayTime: Long = 5000
     private val randomSequenceLength = 5
+
+    // Mjeri ukupno vrijeme potrebno za riješiti zadatke.
+    private var startTime: Long = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityTaskBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // Poveznica na bazu podataka u koju će se spremati rezultati rješenih zadataka.
         database = FirebaseDatabase.getInstance("https://hci-projekt-cb805-default-rtdb.europe-west1.firebasedatabase.app").reference
 
+        // Gumb za predaju zadatka.
         binding.btnSubmitTask.setOnClickListener {
             onSubmitTask()
             showNextTaskDialog()
         }
 
+        // Korisnik ima pravo na jedan probni pokušaj nakon kojeg se vraća na početni zaslon.
         isTestMode = intent.getBooleanExtra("isTestMode", false)
 
+        // Prikaži prozor zadatka s označavanjem objekta na slikama.
         setupRecyclerView()
+
+        // Učitaj test.
         loadNextTask()
     }
 
 
+    // Funkcija vraća šest nasumičnih slika i zadaje objekt kojeg je potrebno označiti.
     private fun setupRecyclerView() {
-        val selectedImages = selectRandomImages() // Nasumično odaberi 6 slika
+        val selectedImages = selectRandomImages()
         binding.rvImageSelection.layoutManager = GridLayoutManager(this, 2)
         binding.rvImageSelection.adapter = ImageSelectionAdapter(selectedImages) { _ ->
         }
         binding.rvImageSelection.visibility = View.VISIBLE
+
+        // Prikaži upute.
         updateImageInstructionText(currentCorrectPicture)
     }
 
+    // Učitaj test sa svim pripadajućim zadatcima i mjeri vrijeme rješavanja.
     private fun loadNextTask() {
 
+        // Ako je korisnik riješio sve testove, završi testiranje.
         if (currentTaskIndex >= adCombinations.size) {
             val intent = Intent(this, SessionManagerActivity::class.java)
             startActivity(intent)
@@ -140,6 +167,7 @@ class TaskActivity : AppCompatActivity() {
         startTime = System.currentTimeMillis()
     }
 
+    // Odaberi kombinaciju pozicije i vrste oglasa.
     private fun initializeAdTypeAdPosition() {
         val (adType, adPosition) = adCombinations[currentTaskIndex]
         currentAdType = adType
@@ -147,6 +175,7 @@ class TaskActivity : AppCompatActivity() {
         setupAd(adType, adPosition)
     }
 
+    // Zadatak sa sortiranjem brojeva.
     private fun initializeSortSequenceTask() {
         val numbers = generateRandomNumbers()
         val isAscending = Random.nextBoolean()
@@ -164,6 +193,7 @@ class TaskActivity : AppCompatActivity() {
         binding.numberSortTaskText.text = "$sortOrderText ${numbers.joinToString(", ")}"
     }
 
+    // Zadatak sa sekvencom brojeva koju je potrebno upamtiti i zapisati.
     private fun setupRememberSequence() {
         binding.sequenceTextView.visibility = View.GONE
         binding.sequenceTaskInstruction.visibility = View.GONE
@@ -184,27 +214,25 @@ class TaskActivity : AppCompatActivity() {
         }
     }
 
+    // Zadatak s prepisivanjem rečenica.
     private fun setupStringTask() {
-        // Filter unseen strings from the list
+        // Odaberi rečenice koje nisu bile ponuđene u prethodnim testovima.
         val unseenStringTasks = stringTasks.filter { it !in usedTypingTestPhrases }
 
-        // Check if there are any unseen strings
         if (unseenStringTasks.isEmpty()) {
-            // Handle case where all string tasks have been used
             Log.e("StringTask", "All string tasks have already been used!")
             return
         }
 
-        // Randomly select an unseen string task
         val stringTask = unseenStringTasks.random()
 
-        // Add the selected task to the used list
+        // Zapiši iskorištenu rečenicu kako se ne bi ponavljala.
         usedTypingTestPhrases.add(stringTask)
 
-        // Display the task in the TextView
         binding.stringCompareTaskText.text = stringTask
     }
 
+    // Matematički zadatak.
     private fun setupMathTask() {
         val mathTask = generateRandomMathTask()
         binding.mathTaskText.text = mathTask
@@ -223,10 +251,13 @@ class TaskActivity : AppCompatActivity() {
         return List(randomSequenceLength) { random.nextInt(0, 10) }
     }
 
+    // Zadatak s odabirom motiva na fotografijama.
     private fun selectRandomImages(): List<Int> {
-        // Odaberi tip fotografije koji treba označiti, a nije već prije bio zadan.
+        // Odaberi motiv koji treba označiti, a nije prije bio zadan.
         val unseenPictureMotifs = pictureTypes.filter { it !in usedPictureMotifs }
         currentCorrectPicture = unseenPictureMotifs.random()
+
+        // Zapamti korišteni motiv kako se ne bi ponavljao u sljedećim zadatcima.
         usedPictureMotifs.add(currentCorrectPicture)
 
         // Makni sve "non" fotografije
@@ -235,7 +266,7 @@ class TaskActivity : AppCompatActivity() {
             resourceName?.startsWith("non") == false
         }
 
-        // Barem dvije ponuđene fotografije u tasku odgovaraju točnom odabiru.
+        // Barem dvije ponuđene fotografije u zadatku odgovaraju točnom odabiru.
         val matchingImages = filteredImages.filter { id ->
             val resourceName = R.drawable::class.java.fields.find { it.getInt(null) == id }?.name
             resourceName?.contains(currentCorrectPicture) == true
@@ -250,40 +281,37 @@ class TaskActivity : AppCompatActivity() {
         return allSelectedImages
     }
 
+    // Funkcija koja vraća odgovarajuće upute za rješavanje u zadatku s odabirom slika.
     private fun updateImageInstructionText(directoryName: String) {
         val instructionText = taskHelper.getInstructionText(directoryName)
         binding.imageTaskInstruction.text = instructionText
     }
 
+    // Zadatak sa slušanjem.
     private fun setupAudioTask() {
-        // Filter unseen files from the list
+        // Izaberi nekorištene motive.
         val unseenAudioFiles = audioFileNames.filter { it !in seenAudioFiles }
 
-        // Check if there are any unseen files
         if (unseenAudioFiles.isEmpty()) {
-            // Handle case where all audio files have been used
             Log.e("AudioTask", "All audio files have already been used!")
             return
         }
 
-        // Randomly select an unseen file and add it to seen files
+        // Nasumično odaberi motiv kojeg će korisnik preslušati i zapisati.
         selectedAudioFileName = unseenAudioFiles.random()
+
+        // Zapamti korištene motive.
         seenAudioFiles.add(selectedAudioFileName!!)
 
         val audioTaskContainer = binding.audioTaskContainer
         val playButton = binding.btnPlayAudio
 
-        // Display the task
         audioTaskContainer.visibility = View.VISIBLE
 
-        // Get the resource ID for the selected audio file
         val resId = resources.getIdentifier(selectedAudioFileName, "raw", packageName)
 
-        if (resId != 0) { // Check if the resource exists
-            // Initialize MediaPlayer with the audio resource
+        if (resId != 0) {
             mediaPlayer = MediaPlayer.create(this, resId)
-
-            // Set up the play button listener
             playButton.setOnClickListener {
                 if (!mediaPlayer.isPlaying) {
                     mediaPlayer.start()
@@ -292,7 +320,6 @@ class TaskActivity : AppCompatActivity() {
                 }
             }
         } else {
-            // Hide the task and log an error if the resource is not found
             audioTaskContainer.visibility = View.GONE
             Log.e("AudioTask", "Audio resource not found for: $selectedAudioFileName")
         }
@@ -317,8 +344,8 @@ class TaskActivity : AppCompatActivity() {
         return numbers
     }
 
+    // Prikaz reklame prema zadanom tipu i poziciji.
     private fun setupAd(adType: String, adPosition: String) {
-        // Prikaz reklame prema tipu i poziciji
         clearAdContainer()
         binding.adContainer.removeAllViews()
         when (adType) {
@@ -338,6 +365,7 @@ class TaskActivity : AppCompatActivity() {
     }
 
     private fun onSubmitTask() {
+        // Izračunaj pogreške za svaku vrstu zadatka.
         val executionTimeInSeconds = calculateExecutionTime()
         val stringErrors = calculateStringErrors()
         val mathErrors = calculateMathErrors()
@@ -347,12 +375,13 @@ class TaskActivity : AppCompatActivity() {
         val audioErrors = calculateAudioErrors()
         val sentenceOrderErrors = calculateSentenceOrderErrors()
         val totalErrors = stringErrors + mathErrors + sortErrors + rememberSequenceErrors + totalPictureErrors + audioErrors + sentenceOrderErrors
+
         val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
             Date()
         )
 
+        // Spremi rezultate u bazu osim ako korisnik nije rješavao probni test.
         if (!isTestMode) {
-            // Spremi rezultate u bazu.
             val results = mapOf(
                 "totalErrors" to totalErrors,
                 "stringErrors" to stringErrors,
@@ -379,6 +408,7 @@ class TaskActivity : AppCompatActivity() {
 
     }
 
+    // Funkcije za računanje pogrešaka.
     private fun calculateStringErrors() : Int {
         val stringInput = binding.stringCompareTaskInput.text.toString()
         val correctString = binding.stringCompareTaskText.text.toString()
@@ -450,10 +480,32 @@ class TaskActivity : AppCompatActivity() {
         return if (userAudioResponse.equals(correctAudioAnswer, ignoreCase = true)) 0 else 1
     }
 
+    private fun calculateSentenceOrderErrors(): Int {
+        val wordToCorrectPosition = correctSentenceOrder.split(" ").mapIndexed { index, word -> word to (index + 1) }.toMap()
+        var errors = 0
+
+        for (i in 0 until binding.wordContainer.childCount) {
+            val wordLayout = binding.wordContainer.getChildAt(i) as LinearLayout
+            val textView = wordLayout.getChildAt(0) as TextView
+            val spinner = wordLayout.getChildAt(1) as Spinner
+
+            val word = textView.text.toString()
+            val selectedPosition = spinner.selectedItem as Int
+            val correctPosition = wordToCorrectPosition[word]
+
+            if (selectedPosition != correctPosition) {
+                errors++
+            }
+        }
+
+        return errors
+    }
+
+    // Vraća vrijeme izvršavanja testa u sekundama.
     private fun calculateExecutionTime() : Double {
         val endTime = System.currentTimeMillis()
         val executionTime = endTime - startTime
-        return executionTime / 1000.0 // Pretvorba u sekunde
+        return executionTime / 1000.0
     }
 
     private fun proceedToNextTaskActions() {
@@ -488,7 +540,6 @@ class TaskActivity : AppCompatActivity() {
             else -> throw IllegalArgumentException("Invalid operation")
         }
     }
-
 
     private fun calculateLevenshteinDistance(s1: String, s2: String): Int {
         val lenStr1 = s1.length
@@ -668,26 +719,25 @@ class TaskActivity : AppCompatActivity() {
     }
 
     private fun getRandomShuffledSentence(): List<String> {
-        // Filter unseen sentences
+        // Vrati nekorištene rečenice.
         val unseenSentences = correctOrderSentences.filter { it !in usedCorrectOrderSentences }
 
-        // Check if there are any unseen sentences
         if (unseenSentences.isEmpty()) {
             Log.e("SentenceTask", "All sentences have already been used!")
             return emptyList() // Return an empty list if all sentences are used
         }
 
-        // Select a random unseen sentence
         correctSentenceOrder = unseenSentences.random()
 
-        // Add the selected sentence to the used list
+        // Korištene rečenice zapamti kako se ne bi ponavljale.
         usedCorrectOrderSentences.add(correctSentenceOrder)
 
-        // Split the sentence into words and shuffle them
+        // Izmiješaj riječi u rečenici.
         val words = correctSentenceOrder.split(" ")
         return words.shuffled()
     }
 
+    // Postavi zadatak u kojem se traži ispravan poredak riječi u rečenici.
     private fun setupSentenceTask() {
         binding.wordContainer.removeAllViews()
         val shuffledWords = getRandomShuffledSentence()
@@ -719,27 +769,6 @@ class TaskActivity : AppCompatActivity() {
             wordLayout.addView(spinner)
             binding.wordContainer.addView(wordLayout)
         }
-    }
-
-    private fun calculateSentenceOrderErrors(): Int {
-        val wordToCorrectPosition = correctSentenceOrder.split(" ").mapIndexed { index, word -> word to (index + 1) }.toMap()
-        var errors = 0
-
-        for (i in 0 until binding.wordContainer.childCount) {
-            val wordLayout = binding.wordContainer.getChildAt(i) as LinearLayout
-            val textView = wordLayout.getChildAt(0) as TextView
-            val spinner = wordLayout.getChildAt(1) as Spinner
-
-            val word = textView.text.toString()
-            val selectedPosition = spinner.selectedItem as Int
-            val correctPosition = wordToCorrectPosition[word]
-
-            if (selectedPosition != correctPosition) {
-                errors++
-            }
-        }
-
-        return errors
     }
 
     private fun showNextTaskDialog() {
