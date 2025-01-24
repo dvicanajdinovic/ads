@@ -666,12 +666,16 @@ class TaskActivity : AppCompatActivity() {
 
     private fun showNextTaskDialog() {
         val builder = AlertDialog.Builder(this)
-        builder.setTitle("Proceed to Next Task?")
-        builder.setMessage("Would you like to continue to the next set of tasks?")
+        builder.setTitle("Prijeđi na sljedeći test?")
+        builder.setMessage("Želite li prijeći na sljedeći set zadataka?")
 
-        builder.setPositiveButton("Proceed") { dialog, _ ->
+        builder.setPositiveButton("Da") { dialog, _ ->
             dialog.dismiss()
             proceedToNextTaskActions()
+        }
+
+        builder.setNegativeButton("Ne") { dialog, _ ->
+            dialog.dismiss()
         }
 
         val alertDialog: AlertDialog = builder.create()
