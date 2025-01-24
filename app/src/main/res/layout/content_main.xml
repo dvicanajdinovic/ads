@@ -8,7 +8,6 @@
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/app_bar_main">
 
-    <!-- ScrollView for instructions -->
     <ScrollView
         android:id="@+id/instructions_scroll"
         android:layout_width="0dp"
@@ -25,7 +24,6 @@
             android:orientation="vertical"
             android:gravity="center_horizontal">
 
-            <!-- CardView for instructions without shadow -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -60,6 +58,18 @@
                         android:textColor="@android:color/black"
                         android:paddingBottom="8dp" />
 
+                    <!-- Start Test Trial -->
+                    <Button
+                        android:id="@+id/button_start_trial"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:backgroundTint="@color/primary"
+                        android:text="probni test"
+                        android:textColor="@android:color/white"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_gravity="center_horizontal"/>
+
                     <TextView
                         android:id="@+id/instruction_page_3"
                         android:layout_width="wrap_content"
@@ -67,21 +77,6 @@
                         android:text="@string/direction2"
                         android:textSize="16sp"
                         android:textColor="@android:color/black" />
-
-                    <!-- Start Test Trial -->
-                    <Button
-                        android:id="@+id/button_start_trial"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="@color/primary"
-                        android:text="Testni Pokušaj"
-                        android:textColor="@android:color/white"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
