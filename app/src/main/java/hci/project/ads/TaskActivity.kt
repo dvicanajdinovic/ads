@@ -346,6 +346,7 @@ class TaskActivity : AppCompatActivity() {
         val totalPictureErrors = calculatePictureErrors()
         val audioErrors = calculateAudioErrors()
         val sentenceOrderErrors = calculateSentenceOrderErrors()
+        val totalErrors = stringErrors + mathErrors + sortErrors + rememberSequenceErrors + totalPictureErrors + audioErrors + sentenceOrderErrors
         val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(
             Date()
         )
@@ -353,6 +354,7 @@ class TaskActivity : AppCompatActivity() {
         if (!isTestMode) {
             // Spremi rezultate u bazu.
             val results = mapOf(
+                "totalErrors" to totalErrors,
                 "stringErrors" to stringErrors,
                 "mathErrors" to mathErrors,
                 "imageErrors" to totalPictureErrors,
