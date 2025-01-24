@@ -22,13 +22,14 @@ import android.widget.LinearLayout
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.VideoView
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
-import com.google.android.exoplayer2.ExoPlayer
-import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
-import com.google.android.exoplayer2.ui.PlayerView
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.common.MediaItem
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.PlayerView
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import hci.project.ads.databinding.ActivityTaskBinding
@@ -493,41 +494,11 @@ class TaskActivity : AppCompatActivity() {
         return ad
     }
 
-
-    /*private fun createVideoAd(position: String): View {
-        clearAdContainer()
-        videoView = VideoView(this)
-        selectedVideoAdName = videoAds.random()
-
-        val resId = resources.getIdentifier(selectedVideoAdName, "raw", packageName)
-
-        if (resId != 0) {
-            val uri = Uri.parse("android.resource://$packageName/$resId")
-            videoView.setVideoURI(uri)
-        } else {
-            Log.e("VideoAd", "Video resource not found for: $selectedVideoAdName")
-        }
-
-        val layoutParams = FrameLayout.LayoutParams(dpToPx(150), dpToPx(150)) // Jednake dimenzije
-        videoView.layoutParams = layoutParams
-
-        videoView.setOnPreparedListener { mp ->
-            mp.isLooping = true
-            videoView.start()
-        }
-        videoView.setOnErrorListener { _, what, extra ->
-            Log.e("VideoAd", "Error: $what, $extra")
-            true
-        }
-        setAdPosition(videoView, position) // Postavi poziciju
-        videoView.invalidate()
-        return videoView
-    }*/
-
+    @OptIn(UnstableApi::class)
     private fun createVideoAd(position: String): View {
         clearAdContainer()
 
-        // Create an ExoPlayer instance
+        // Create a new ExoPlayer instance
         exoPlayer = ExoPlayer.Builder(this).build()
 
         // Create a PlayerView and set its size
@@ -535,7 +506,7 @@ class TaskActivity : AppCompatActivity() {
         val layoutParams = FrameLayout.LayoutParams(dpToPx(150), dpToPx(150)) // Set size
         playerView.layoutParams = layoutParams
         playerView.player = exoPlayer
-        playerView.useController = false // Hide playback controls if unnecessary
+        playerView.useController = false // Hide playback controls
         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
 
 
@@ -544,9 +515,9 @@ class TaskActivity : AppCompatActivity() {
         val resId = resources.getIdentifier(selectedVideoAdName, "raw", packageName)
         if (resId != 0) {
             val uri = Uri.parse("android.resource://$packageName/$resId")
-            val mediaItem = MediaItem.fromUri(uri)
+            val mediaItem = MediaItem.Builder().setUri(uri).build()
             exoPlayer.setMediaItem(mediaItem)
-            exoPlayer.repeatMode = Player.REPEAT_MODE_ALL // Loop the video
+            exoPlayer.repeatMode = ExoPlayer.REPEAT_MODE_ALL // Loop the video
             exoPlayer.prepare()
             exoPlayer.playWhenReady = true
         } else {
@@ -558,6 +529,7 @@ class TaskActivity : AppCompatActivity() {
 
         return playerView
     }
+
 
 
     override fun onPause() {

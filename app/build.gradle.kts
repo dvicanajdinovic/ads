@@ -58,6 +58,7 @@ dependencies {
     implementation(libs.firebase.storage)
     implementation(libs.glide)
     annotationProcessor(libs.glide.compiler)
-    implementation(libs.exoplayer)
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
 
 }
