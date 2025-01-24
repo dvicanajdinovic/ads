@@ -65,6 +65,11 @@ class TaskActivity : AppCompatActivity() {
     private val staticAds = taskHelper.loadStaticAdNames()
     private val blinkingAds = taskHelper.loadBlinkingAdNames()
 
+    // Prati iskorištene vrijednosti
+    private val seenAudioFiles = mutableListOf<String>()
+    private val usedTypingTestPhrases = mutableListOf<String>()
+    private val usedCorrectOrderSentences = mutableListOf<String>()
+
     private val imagesInDrawable: List<Int> by lazy {
         R.drawable::class.java.fields
             .filter { field -> pictureTypes.any { field.name.startsWith(it) } }
@@ -176,7 +181,23 @@ class TaskActivity : AppCompatActivity() {
     }
 
     private fun setupStringTask() {
-        val stringTask = stringTasks.random()
+        // Filter unseen strings from the list
+        val unseenStringTasks = stringTasks.filter { it !in usedTypingTestPhrases }
+
+        // Check if there are any unseen strings
+        if (unseenStringTasks.isEmpty()) {
+            // Handle case where all string tasks have been used
+            Log.e("StringTask", "All string tasks have already been used!")
+            return
+        }
+
+        // Randomly select an unseen string task
+        val stringTask = unseenStringTasks.random()
+
+        // Add the selected task to the used list
+        usedTypingTestPhrases.add(stringTask)
+
+        // Display the task in the TextView
         binding.stringCompareTaskText.text = stringTask
     }
 
@@ -229,21 +250,34 @@ class TaskActivity : AppCompatActivity() {
     }
 
     private fun setupAudioTask() {
-        selectedAudioFileName = audioFileNames.random()
+        // Filter unseen files from the list
+        val unseenAudioFiles = audioFileNames.filter { it !in seenAudioFiles }
+
+        // Check if there are any unseen files
+        if (unseenAudioFiles.isEmpty()) {
+            // Handle case where all audio files have been used
+            Log.e("AudioTask", "All audio files have already been used!")
+            return
+        }
+
+        // Randomly select an unseen file and add it to seen files
+        selectedAudioFileName = unseenAudioFiles.random()
+        seenAudioFiles.add(selectedAudioFileName!!)
+
         val audioTaskContainer = binding.audioTaskContainer
         val playButton = binding.btnPlayAudio
 
-        // Prikaži zadatak
+        // Display the task
         audioTaskContainer.visibility = View.VISIBLE
 
-        // Dohvati resursni ID audio datoteke na temelju odabranog naziva
+        // Get the resource ID for the selected audio file
         val resId = resources.getIdentifier(selectedAudioFileName, "raw", packageName)
 
-        if (resId != 0) { // Provjeri je li resurs pronađen
-            // Poveži MediaPlayer s audio resursom
+        if (resId != 0) { // Check if the resource exists
+            // Initialize MediaPlayer with the audio resource
             mediaPlayer = MediaPlayer.create(this, resId)
 
-            // Postavi listener za reprodukciju
+            // Set up the play button listener
             playButton.setOnClickListener {
                 if (!mediaPlayer.isPlaying) {
                     mediaPlayer.start()
@@ -252,9 +286,9 @@ class TaskActivity : AppCompatActivity() {
                 }
             }
         } else {
-            // Ako resurs nije pronađen, sakrij zadatak i prikaži poruku o grešci
+            // Hide the task and log an error if the resource is not found
             audioTaskContainer.visibility = View.GONE
-            Log.e("AudioTask", "Audio resurs nije pronađen za: $selectedAudioFileName")
+            Log.e("AudioTask", "Audio resource not found for: $selectedAudioFileName")
         }
     }
 
@@ -626,7 +660,22 @@ class TaskActivity : AppCompatActivity() {
     }
 
     private fun getRandomShuffledSentence(): List<String> {
-        correctSentenceOrder = correctOrderSentences.random()
+        // Filter unseen sentences
+        val unseenSentences = correctOrderSentences.filter { it !in usedCorrectOrderSentences }
+
+        // Check if there are any unseen sentences
+        if (unseenSentences.isEmpty()) {
+            Log.e("SentenceTask", "All sentences have already been used!")
+            return emptyList() // Return an empty list if all sentences are used
+        }
+
+        // Select a random unseen sentence
+        correctSentenceOrder = unseenSentences.random()
+
+        // Add the selected sentence to the used list
+        usedCorrectOrderSentences.add(correctSentenceOrder)
+
+        // Split the sentence into words and shuffle them
         val words = correctSentenceOrder.split(" ")
         return words.shuffled()
     }
