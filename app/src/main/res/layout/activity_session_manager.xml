@@ -81,7 +81,6 @@
         android:padding="8dp"
         android:elevation="8dp">
 
-        <!-- Text First -->
         <TextView
             android:id="@+id/play_text"
             android:layout_width="wrap_content"
