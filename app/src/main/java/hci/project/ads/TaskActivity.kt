@@ -69,6 +69,7 @@ class TaskActivity : AppCompatActivity() {
     private val seenAudioFiles = mutableListOf<String>()
     private val usedTypingTestPhrases = mutableListOf<String>()
     private val usedCorrectOrderSentences = mutableListOf<String>()
+    private val usedPictureMotifs = mutableListOf<String>()
 
     private val imagesInDrawable: List<Int> by lazy {
         R.drawable::class.java.fields
@@ -220,8 +221,10 @@ class TaskActivity : AppCompatActivity() {
     }
 
     private fun selectRandomImages(): List<Int> {
-        // Odaberi tip fotografije koji treba označiti.
-        currentCorrectPicture = pictureTypes.random()
+        // Odaberi tip fotografije koji treba označiti, a nije već prije bio zadan.
+        val unseenPictureMotifs = pictureTypes.filter { it !in usedPictureMotifs }
+        currentCorrectPicture = unseenPictureMotifs.random()
+        usedPictureMotifs.add(currentCorrectPicture)
 
         // Makni sve "non" fotografije
         val filteredImages = imagesInDrawable.filter { id ->
