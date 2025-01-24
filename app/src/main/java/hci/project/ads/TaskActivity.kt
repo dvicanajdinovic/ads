@@ -24,6 +24,11 @@ import android.widget.TextView
 import android.widget.VideoView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.exoplayer2.ExoPlayer
+import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
+import com.google.android.exoplayer2.ui.PlayerView
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import hci.project.ads.databinding.ActivityTaskBinding
@@ -38,6 +43,7 @@ class TaskActivity : AppCompatActivity() {
     private lateinit var binding: ActivityTaskBinding
     private lateinit var database: DatabaseReference
     private lateinit var videoView: VideoView
+    private lateinit var exoPlayer: ExoPlayer
     private lateinit var blinkingAd: ImageView
     private lateinit var currentCorrectPicture: String
     private lateinit var mediaPlayer: MediaPlayer
@@ -409,6 +415,9 @@ class TaskActivity : AppCompatActivity() {
 
     private fun proceedToNextTaskActions() {
         currentTaskIndex++
+        if (::exoPlayer.isInitialized) {
+            exoPlayer.release()
+        }
 
         // Resetiraj RecyclerView sa novim slikama.
         resetRecyclerView()
@@ -477,7 +486,7 @@ class TaskActivity : AppCompatActivity() {
             Log.e("StaticAd", "Static ad resource not found for: $selectedStaticAdName")
         }
 
-        val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300) // Jednake dimenzije
+        val layoutParams = FrameLayout.LayoutParams(dpToPx(150), dpToPx(150)) // Jednake dimenzije
         ad.layoutParams = layoutParams
         ad.scaleType = ImageView.ScaleType.FIT_XY
         setAdPosition(ad, position) // Postavi poziciju
@@ -485,7 +494,7 @@ class TaskActivity : AppCompatActivity() {
     }
 
 
-    private fun createVideoAd(position: String): View {
+    /*private fun createVideoAd(position: String): View {
         clearAdContainer()
         videoView = VideoView(this)
         selectedVideoAdName = videoAds.random()
@@ -499,7 +508,7 @@ class TaskActivity : AppCompatActivity() {
             Log.e("VideoAd", "Video resource not found for: $selectedVideoAdName")
         }
 
-        val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300) // Jednake dimenzije
+        val layoutParams = FrameLayout.LayoutParams(dpToPx(150), dpToPx(150)) // Jednake dimenzije
         videoView.layoutParams = layoutParams
 
         videoView.setOnPreparedListener { mp ->
@@ -511,8 +520,45 @@ class TaskActivity : AppCompatActivity() {
             true
         }
         setAdPosition(videoView, position) // Postavi poziciju
+        videoView.invalidate()
         return videoView
+    }*/
+
+    private fun createVideoAd(position: String): View {
+        clearAdContainer()
+
+        // Create an ExoPlayer instance
+        exoPlayer = ExoPlayer.Builder(this).build()
+
+        // Create a PlayerView and set its size
+        val playerView = PlayerView(this)
+        val layoutParams = FrameLayout.LayoutParams(dpToPx(150), dpToPx(150)) // Set size
+        playerView.layoutParams = layoutParams
+        playerView.player = exoPlayer
+        playerView.useController = false // Hide playback controls if unnecessary
+        playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
+
+
+        // Prepare the video
+        selectedVideoAdName = videoAds.random()
+        val resId = resources.getIdentifier(selectedVideoAdName, "raw", packageName)
+        if (resId != 0) {
+            val uri = Uri.parse("android.resource://$packageName/$resId")
+            val mediaItem = MediaItem.fromUri(uri)
+            exoPlayer.setMediaItem(mediaItem)
+            exoPlayer.repeatMode = Player.REPEAT_MODE_ALL // Loop the video
+            exoPlayer.prepare()
+            exoPlayer.playWhenReady = true
+        } else {
+            Log.e("VideoAd", "Video resource not found for: $selectedVideoAdName")
+        }
+
+        // Set position
+        setAdPosition(playerView, position)
+
+        return playerView
     }
+
 
     override fun onPause() {
         super.onPause()
@@ -535,6 +581,9 @@ class TaskActivity : AppCompatActivity() {
         if (::mediaPlayer.isInitialized) {
             mediaPlayer.release()
         }
+        if (::exoPlayer.isInitialized) {
+            exoPlayer.release()
+        }
     }
 
     private fun createBlinkingAd(position: String): View {
@@ -550,7 +599,7 @@ class TaskActivity : AppCompatActivity() {
             Log.e("BlinkingAd", "Blinking ad resource not found for: $selectedBlinkingAdName")
         }
 
-        val layoutParams = FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, 300) // Jednake dimenzije
+        val layoutParams = FrameLayout.LayoutParams(dpToPx(150), dpToPx(150)) // Jednake dimenzije
         blinkingAd.layoutParams = layoutParams
         blinkingAd.scaleType = ImageView.ScaleType.FIT_XY
         // Dodaj animaciju za titranje
@@ -595,7 +644,7 @@ class TaskActivity : AppCompatActivity() {
         Log.d("Ads", "Clearing ad container with ${adContainer.childCount} children.")
         for (i in 0 until adContainer.childCount) {
             val view = adContainer.getChildAt(i)
-            if (view is ImageView || view is VideoView) {
+            if (view is ImageView || view is VideoView || view is ExoPlayer) {
                 Log.d("Ads", "Clearing animation for view: $view")
                 view.clearAnimation() // Ovdje se poziva zaustavljanje animacije
             }
@@ -680,5 +729,10 @@ class TaskActivity : AppCompatActivity() {
 
         val alertDialog: AlertDialog = builder.create()
         alertDialog.show()
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        val density = resources.displayMetrics.density
+        return (dp * density).toInt()
     }
 }
