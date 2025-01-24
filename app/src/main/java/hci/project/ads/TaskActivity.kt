@@ -48,7 +48,7 @@ class TaskActivity : AppCompatActivity() {
     private lateinit var currentCorrectPicture: String
     private lateinit var mediaPlayer: MediaPlayer
     private lateinit var currentAdType: String
-    private lateinit var currentAdPoisition: String
+    private lateinit var currentAdPosition: String
     private lateinit var sortedNumbers: List<Int>
     private lateinit var correctSentenceOrder: String
 
@@ -115,7 +115,7 @@ class TaskActivity : AppCompatActivity() {
         // Gumb za predaju zadatka.
         binding.btnSubmitTask.setOnClickListener {
             onSubmitTask()
-            showNextTaskDialog()
+            if(!isTestMode) showNextTaskDialog()
         }
 
         // Korisnik ima pravo na jedan probni pokušaj nakon kojeg se vraća na početni zaslon.
@@ -154,7 +154,12 @@ class TaskActivity : AppCompatActivity() {
 
         currentFocus?.clearFocus()
 
-        initializeAdTypeAdPosition()
+        if(!isTestMode) initializeAdTypeAdPosition()
+        else {
+            currentAdType = "noAd"
+            currentAdPosition = "noPosition"
+        }
+
         initializeSortSequenceTask()
         setupAudioTask()
         setupRememberSequence()
@@ -171,7 +176,7 @@ class TaskActivity : AppCompatActivity() {
     private fun initializeAdTypeAdPosition() {
         val (adType, adPosition) = adCombinations[currentTaskIndex]
         currentAdType = adType
-        currentAdPoisition = adPosition
+        currentAdPosition = adPosition
         setupAd(adType, adPosition)
     }
 
@@ -393,7 +398,7 @@ class TaskActivity : AppCompatActivity() {
                 "sentenceOrderErrors" to sentenceOrderErrors,
                 "executionTime" to executionTimeInSeconds,
                 "adType" to currentAdType,
-                "adPosition" to currentAdPoisition,
+                "adPosition" to currentAdPosition,
                 "timestamp" to timestamp
             )
             // Kreni na sljedeći zadatak.
