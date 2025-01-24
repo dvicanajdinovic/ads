@@ -166,6 +166,7 @@ class TaskActivity : AppCompatActivity() {
 
     private fun setupRememberSequence() {
         binding.sequenceTextView.visibility = View.GONE
+        binding.sequenceTaskInstruction.visibility = View.GONE
         binding.sequenceShowButton.visibility = View.VISIBLE
         sequence = generateRandomSequence()
         binding.sequenceTextView.text = sequence.joinToString(" ")
@@ -173,10 +174,12 @@ class TaskActivity : AppCompatActivity() {
             binding.sequenceTextView.visibility = View.VISIBLE
             binding.sequenceShowButton.visibility = View.GONE
             binding.sequenceUserInputText.visibility = View.GONE
+            binding.sequenceTaskInstruction.visibility = View.GONE
 
             Handler(Looper.getMainLooper()).postDelayed({
                 binding.sequenceTextView.visibility = View.GONE
                 binding.sequenceUserInputText.visibility = View.VISIBLE
+                binding.sequenceTaskInstruction.visibility = View.VISIBLE
             }, sequenceDisplayTime)
         }
     }
