@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.appBarMain.contentMain.buttonStartTrial.setOnClickListener {
-            Toast.makeText(this, "Test Mode: Only 1 iteration will be executed.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Testni Način Rada: Samo 1 test će se izvršiti.", Toast.LENGTH_LONG).show()
 
             val intent = Intent(this, TaskActivity::class.java).apply {
                 putExtra("isTestMode", true)
