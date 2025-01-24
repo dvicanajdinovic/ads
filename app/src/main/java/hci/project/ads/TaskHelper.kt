@@ -34,7 +34,7 @@ class TaskHelper {
             "ne mogu dugo roniti",
             "potrudi se na instrukcijama",
             "fen je topao vjetar",
-            "sve visibabe imaju lukovicu",
+            "visibabe imaju malu lukovicu",
             "fotografirao je polarnu svjetlost",
             "baterija ne radi dobro",
             "klima ne pogoduje limunu",
@@ -42,13 +42,14 @@ class TaskHelper {
             "sad zamotaj kupljene poklone",
             "igrac je zabio gol",
             "rijeka je osvojila kup",
-            "put je trajao dugo"
+            "krenuli smo na put"
         )
     }
 
     fun loadImageKeywords(): List<String> {
         return listOf(
-            "car", "slon", "cat", "castle", "firework", "mouse"
+            "car", "elephant", "cat", "castle", "firework", "mouse", "boat", "book", "bear", "piano", "fish",
+            "excavator", "phone"
         )
     }
 
@@ -95,11 +96,18 @@ class TaskHelper {
     fun getInstructionText(directoryName: String): String {
         return when (directoryName) {
             "car" -> "Označi automobile."
-            "slon" -> "Označi slonove."
+            "elephant" -> "Označi slonove."
             "cat" -> "Označi mačke."
             "firework" -> "Označi vatromet."
             "mouse" -> "Označi miševe."
             "castle" -> "Označi dvorce."
+            "boat" -> "Označi brodove."
+            "bear" -> "Označi medvjede."
+            "book" -> "Označi knjige."
+            "excavator" -> "Označi bagere."
+            "fish" -> "Označi ribe."
+            "phone" -> "Označi telefone."
+            "piano" -> "Označi glasovire."
             else -> "Izaberi slike."
         }
     }
