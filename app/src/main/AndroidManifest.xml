@@ -30,7 +30,6 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".SettingsActivity" />
         <activity android:name=".TaskActivity" />
         <activity android:name=".SessionManagerActivity" />
 
