@@ -60,7 +60,8 @@
                         android:text="@string/direction1"
                         android:textSize="16sp"
                         android:textColor="@android:color/black"
-                        android:layout_marginBottom="10dp" />
+                        android:layout_marginBottom="10dp"
+                        android:justificationMode="inter_word" />
 
                     <TextView
                         android:id="@+id/instruction_page_2"
@@ -69,7 +70,8 @@
                         android:text="@string/direction2"
                         android:textSize="16sp"
                         android:textColor="@android:color/black"
-                        android:layout_marginBottom="10dp" />
+                        android:layout_marginBottom="10dp"
+                        android:justificationMode="inter_word" />
 
                     <TextView
                         android:id="@+id/instruction_page_3"
@@ -78,7 +80,8 @@
                         android:text="@string/direction3"
                         android:textSize="16sp"
                         android:textColor="@android:color/black"
-                        android:layout_marginBottom="10dp" />
+                        android:layout_marginBottom="10dp"
+                        android:justificationMode="inter_word" />
 
                     <!-- Start Test Trial -->
                     <Button
@@ -100,7 +103,8 @@
                         android:text="@string/direction4"
                         android:textSize="16sp"
                         android:textColor="@android:color/black"
-                        android:layout_marginBottom="10dp" />
+                        android:layout_marginBottom="10dp"
+                        android:justificationMode="inter_word" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

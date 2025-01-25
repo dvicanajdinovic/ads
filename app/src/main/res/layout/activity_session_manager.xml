@@ -43,7 +43,10 @@
                         android:text="@string/message_task_completed"
                         android:textSize="18sp"
                         android:textColor="@color/black"
-                        android:paddingBottom="8dp" />
+                        android:textAllCaps="true"
+                        android:textStyle="bold"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="10dp" />
 
                     <TextView
                         android:id="@+id/instruction_page_2"
@@ -52,7 +55,8 @@
                         android:text="@string/message_data_collected"
                         android:textSize="16sp"
                         android:textColor="@android:color/black"
-                        android:paddingBottom="8dp" />
+                        android:layout_marginBottom="10dp"
+                        android:justificationMode="inter_word" />
 
                     <TextView
                         android:id="@+id/instruction_page_3"
@@ -60,7 +64,8 @@
                         android:layout_height="wrap_content"
                         android:text="@string/message_thank_you"
                         android:textSize="16sp"
-                        android:textColor="@android:color/black" />
+                        android:textColor="@android:color/black"
+                        android:justificationMode="inter_word" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
