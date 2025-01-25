@@ -420,13 +420,13 @@ class TaskActivity : AppCompatActivity() {
     // Funkcije za računanje pogrešaka.
     private fun calculateStringErrors() : Int {
         val stringInput = binding.stringCompareTaskInput.text.toString()
-        val correctString = binding.stringCompareTaskText.text.toString()
+        val correctString = binding.stringCompareTaskText.text.toString().removePrefix("Prepiši tekst:").trim()
         return calculateLevenshteinDistance(stringInput, correctString)
     }
 
     private fun calculateMathErrors() : Int {
         val mathInput = binding.mathTaskInput.text.toString()
-        val correctMathInput = evaluateMathTask(binding.mathTaskText.text.toString())
+        val correctMathInput = evaluateMathTask(binding.mathTaskText.text.toString().removePrefix("Izračunaj:").trim())
         return if (mathInput == correctMathInput.toString()) 0 else 1
     }
 
