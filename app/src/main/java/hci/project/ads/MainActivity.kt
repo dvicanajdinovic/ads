@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.appBarMain.contentMain.buttonStartTrial.setOnClickListener {
-            Toast.makeText(this, "Testni Način Rada: Samo 1 test će se izvršiti.", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Testni način rada. Riješava se samo 1 ispit.", Toast.LENGTH_LONG).show()
 
             // Označi je li korisnik odabrao testni način.
             val intent = Intent(this, TaskActivity::class.java).apply {

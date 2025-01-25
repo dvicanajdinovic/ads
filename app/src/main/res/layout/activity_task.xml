@@ -207,7 +207,7 @@
                         android:id="@+id/audioTaskInstruction"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Preslušaj audio snimku i napiši što čuješ:"
+                        android:text="Preslušaj zvučni zapis i napiši što čuješ:"
                         android:textSize="16sp"
                         android:layout_marginBottom="8dp" />
 
@@ -299,7 +299,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Složi rečenicu"/>
+                            android:text="Složi rečenicu."/>
 
                         <LinearLayout
                             android:id="@+id/word_container"
@@ -316,7 +316,7 @@
                 android:id="@+id/btnSubmitTask"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Predaj Test" />
+                android:text="Predaj ispit" />
 
         </LinearLayout>
     </ScrollView>
