@@ -238,13 +238,13 @@ class TaskActivity : AppCompatActivity() {
         // Zapiši iskorištenu rečenicu kako se ne bi ponavljala.
         usedTypingTestPhrases.add(stringTask)
 
-        binding.stringCompareTaskText.text = stringTask
+        binding.stringCompareTaskText.text = "Prepiši tekst: " + stringTask
     }
 
     // Matematički zadatak.
     private fun setupMathTask() {
         val mathTask = generateRandomMathTask()
-        binding.mathTaskText.text = mathTask
+        binding.mathTaskText.text = "Izračunaj: " + mathTask
     }
 
     private fun clearUserInputs() {
