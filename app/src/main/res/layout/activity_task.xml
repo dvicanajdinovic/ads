@@ -60,7 +60,7 @@
                         android:id="@+id/stringCompareTaskInput"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Unesi tekst ovdje"
+                        android:hint="Prepiši tekst ovdje"
                         android:inputType="text"
                         android:layout_marginTop="8dp" />
                 </LinearLayout>
