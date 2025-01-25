@@ -31,6 +31,7 @@ import androidx.media3.ui.PlayerView
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
 import hci.project.ads.databinding.ActivityTaskBinding
+import kotlinx.coroutines.selects.select
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -76,6 +77,9 @@ class TaskActivity : AppCompatActivity() {
     private val usedTypingTestPhrases = mutableListOf<String>()
     private val usedCorrectOrderSentences = mutableListOf<String>()
     private val usedPictureMotifs = mutableListOf<String>()
+    private val usedVideoAds = mutableListOf<String>()
+    private val usedStaticAds = mutableListOf<String>()
+    private val usedBlinkingAds = mutableListOf<String>()
 
     // Učitaj resurse iz mape drawable.
     private val imagesInDrawable: List<Int> by lazy {
@@ -573,7 +577,12 @@ class TaskActivity : AppCompatActivity() {
     // Funkcije za stvaranje reklama
     private fun createStaticAd(position: String): View {
         clearAdContainer()
-        selectedStaticAdName = staticAds.random()
+        val unseenStaticAds = staticAds.filter { it !in usedStaticAds }
+
+        val selectedAd = unseenStaticAds.random()
+        selectedStaticAdName = selectedAd
+
+        usedStaticAds.add(selectedAd)
 
         val ad = ImageView(this)
 
@@ -608,8 +617,14 @@ class TaskActivity : AppCompatActivity() {
         playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FILL
 
 
-        // Prepare the video
-        selectedVideoAdName = videoAds.random()
+        // Pripremi videozapis
+        val unseenVideoAds = videoAds.filter { it !in usedVideoAds }
+
+        val selectedAd = unseenVideoAds.random()
+        selectedVideoAdName = selectedAd
+
+        usedVideoAds.add(selectedAd)
+
         val resId = resources.getIdentifier(selectedVideoAdName, "raw", packageName)
         if (resId != 0) {
             val uri = Uri.parse("android.resource://$packageName/$resId")
@@ -622,7 +637,6 @@ class TaskActivity : AppCompatActivity() {
             Log.e("VideoAd", "Video resource not found for: $selectedVideoAdName")
         }
 
-        // Set position
         setAdPosition(playerView, position)
 
         return playerView
@@ -658,7 +672,14 @@ class TaskActivity : AppCompatActivity() {
 
     private fun createBlinkingAd(position: String): View {
         clearAdContainer() // Ukloni postojeće prikaze i animacije
-        selectedBlinkingAdName = blinkingAds.random()
+
+        val unseenBlinkingAds = blinkingAds.filter { it !in usedBlinkingAds }
+
+        val selectedAd = unseenBlinkingAds.random()
+        selectedBlinkingAdName = selectedAd
+
+        usedBlinkingAds.add(selectedAd)
+
         blinkingAd = ImageView(this)
 
         val resId = resources.getIdentifier(selectedBlinkingAdName, "drawable", packageName)
