@@ -12,6 +12,12 @@
     <string name="message_data_collected">Vaši su rezultati zabilježeni u bazi podataka i spremni za analizu.</string>
     <string name="message_thank_you">Zahvaljujemo se na izdvojenom vremenu i strpljenju.</string>
     <string name="directions">Upute prije testiranja</string>
-    <string name="direction1">Prije pokretanja ispita moguće je isprobati aplikaciju klikom na gumb \'PROBNI TEST\'.</string>
-    <string name="direction2">Za vrijeme testiranja, klikom na \'PREDAJ ISPIT\', Vaši će se rezultati zabilježiti u bazi podataka.</string>
+    <string name="direction1">Testiranje se sastoji od 10 ispita.
+                            Svaki ispit ima 7 zadataka različite vrste.
+    </string>
+    <string name="direction2">Tijekom ispita na desnoj strani zaslona pojavljivat će se oglasi (smetnje).
+                            Pokušajte ostvariti što bolje rezultate bez obzira na smetnje.
+    </string>
+    <string name="direction3">Prije pokretanja ispita moguće je riješiti probni test klikom na gumb \'PROBNI TEST\'.</string>
+    <string name="direction4">Tijekom testiranja klikom na \'PREDAJ ISPIT\', Vaši će se rezultati zabilježiti u bazi podataka.</string>
 </resources>

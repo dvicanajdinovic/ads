@@ -41,22 +41,44 @@
                     android:padding="24dp">
 
                     <TextView
-                        android:id="@+id/instruction_page_1"
+                        android:id="@+id/instruction_page"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/directions"
                         android:textSize="18sp"
                         android:textColor="@color/black"
-                        android:paddingBottom="8dp" />
+                        android:paddingBottom="8dp"
+                        android:textAllCaps="true"
+                        android:textStyle="bold"
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="10dp"/>
 
                     <TextView
-                        android:id="@+id/instruction_page_2"
+                        android:id="@+id/instruction_page_1"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/direction1"
                         android:textSize="16sp"
                         android:textColor="@android:color/black"
-                        android:paddingBottom="8dp" />
+                        android:layout_marginBottom="10dp" />
+
+                    <TextView
+                        android:id="@+id/instruction_page_2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/direction2"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="10dp" />
+
+                    <TextView
+                        android:id="@+id/instruction_page_3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/direction3"
+                        android:textSize="16sp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="10dp" />
 
                     <!-- Start Test Trial -->
                     <Button
@@ -68,15 +90,17 @@
                         android:textColor="@android:color/white"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        android:layout_gravity="center_horizontal"/>
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginBottom="10dp" />
 
                     <TextView
-                        android:id="@+id/instruction_page_3"
+                        android:id="@+id/instruction_page_4"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="@string/direction2"
+                        android:text="@string/direction4"
                         android:textSize="16sp"
-                        android:textColor="@android:color/black" />
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="10dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
